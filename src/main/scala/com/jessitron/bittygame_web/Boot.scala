@@ -1,4 +1,4 @@
-package com.example
+package com.jessitron.bittygame_web
 
 import akka.actor.{ActorSystem, Props}
 import akka.io.IO
