@@ -1,28 +1,31 @@
 package com.jessitron.bittygame_web
 
-import org.specs2.mutable.Specification
-import spray.testkit.Specs2RouteTest
+import org.scalatest.ShouldMatchers
+import spray.testkit.ScalatestRouteTest
 import spray.http._
 import StatusCodes._
 
-class MyServiceSpec extends Specification with Specs2RouteTest with MyService {
+class MyServiceSpec extends org.scalatest.FunSpec
+                       with ScalatestRouteTest
+                       with ShouldMatchers
+                       with MyService {
   def actorRefFactory = system
   
-  "MyService" should {
+  describe ("MyService") {
 
-    "return a greeting for GET requests to the root path" in {
-      Get() ~> myRoute ~> check {
-        responseAs[String] must contain("Say hello")
+    it("return a greeting for GET requests to the root path") {
+      Get("game/yolo/begin") ~> myRoute ~> check {
+        responseAs[String] should contain("Say hello")
       }
     }
 
-    "leave GET requests to other paths unhandled" in {
+    it("leave GET requests to other paths unhandled") {
       Get("/kermit") ~> myRoute ~> check {
-        handled must beFalse
+        handled should be(false)
       }
     }
 
-    "return a MethodNotAllowed error for PUT requests to the root path" in {
+    it("return a MethodNotAllowed error for PUT requests to the root path") {
       Put() ~> sealRoute(myRoute) ~> check {
         status === MethodNotAllowed
         responseAs[String] === "HTTP method not allowed, supported methods: GET"
