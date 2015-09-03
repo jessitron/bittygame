@@ -14,8 +14,8 @@ class MyServiceSpec extends org.scalatest.FunSpec
   describe ("MyService") {
 
     it("return a greeting for GET requests to the root path") {
-      Get("game/yolo/begin") ~> myRoute ~> check {
-        responseAs[String] should contain("Say hello")
+      Get("/game/yolo/begin") ~> myRoute ~> check {
+        responseAs[String].contains("Say hello") should be(true)
       }
     }
 

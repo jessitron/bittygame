@@ -31,7 +31,7 @@ trait MyService extends HttpService {
       get {
         respondWithMediaType(`application/json`) {
           complete {
-            Map("foo" -> "bar", "morefoo" -> "baz")
+            Map("foo" -> "bar", "Say hello" -> "baz")
           }
         }
       }
