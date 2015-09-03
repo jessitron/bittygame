@@ -1,4 +1,4 @@
-package com.jessitron.bittygame_web
+package com.jessitron.bittygame.web
 
 import akka.actor.Actor
 import spray.routing._

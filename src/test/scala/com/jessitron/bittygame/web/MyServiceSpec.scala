@@ -1,4 +1,4 @@
-package com.jessitron.bittygame_web
+package com.jessitron.bittygame.web
 
 import org.scalatest.ShouldMatchers
 import spray.testkit.ScalatestRouteTest
