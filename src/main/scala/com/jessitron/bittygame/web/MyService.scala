@@ -1,6 +1,7 @@
 package com.jessitron.bittygame.web
 
 import akka.actor.Actor
+import com.jessitron.bittygame.crux.GameDefinition
 import spray.routing._
 import spray.http._
 import MediaTypes._
@@ -24,12 +25,22 @@ class MyServiceActor extends Actor with MyService {
 
 trait MyService extends HttpService {
 
-  val myRoute =
-    path("game" / Segment / "begin" ) { seg =>
-      get {
-        complete {
-          Map("foo" -> seg, "Say hello" -> "baz")
-        }
+  private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
+    get {
+      complete {
+        Map("foo" -> seg, "Say hello" -> "baz")
       }
     }
+  }
+
+  private val createGameDef: Route = path("game" / Segment) { seg =>
+    entity(as[GameDefinition]) { gameDef =>
+      put {
+
+        complete(StatusCodes.OK)
+      }
+    }
+  }
+  val myRoute =
+    firstTurn ~ createGameDef
 }

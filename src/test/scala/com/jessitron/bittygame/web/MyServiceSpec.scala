@@ -1,5 +1,6 @@
 package com.jessitron.bittygame.web
 
+import com.jessitron.bittygame.crux.GameDefinition
 import org.scalatest.ShouldMatchers
 import spray.testkit.ScalatestRouteTest
 import spray.http._
@@ -22,8 +23,9 @@ class MyServiceSpec extends org.scalatest.FunSpec
     }
 
     it("prints the welcome message") {
+      val someGame = GameDefinition(Seq(), "Why hello there")
       import spray.json.DefaultJsonProtocol._
-      Put("/game/yolo", Seq("foo", "bar")) ~> myRoute ~> check {
+      Put("/game/yolo", someGame) ~> myRoute ~> check {
         status === Created
       }
     }
