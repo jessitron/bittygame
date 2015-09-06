@@ -3,6 +3,8 @@ package com.jessitron.bittygame.web
 import org.scalatest.ShouldMatchers
 import spray.testkit.ScalatestRouteTest
 import spray.http._
+import spray.httpx.SprayJsonSupport._
+import spray.json._
 import StatusCodes._
 
 class MyServiceSpec extends org.scalatest.FunSpec
@@ -19,17 +21,12 @@ class MyServiceSpec extends org.scalatest.FunSpec
       }
     }
 
-    it("leave GET requests to other paths unhandled") {
-      Get("/kermit") ~> myRoute ~> check {
-        handled should be(false)
+    it("prints the welcome message") {
+      import spray.json.DefaultJsonProtocol._
+      Put("/game/yolo", Seq("foo", "bar")) ~> myRoute ~> check {
+        status === Created
       }
     }
 
-    it("return a MethodNotAllowed error for PUT requests to the root path") {
-      Put() ~> sealRoute(myRoute) ~> check {
-        status === MethodNotAllowed
-        responseAs[String] === "HTTP method not allowed, supported methods: GET"
-      }
-    }
   }
 }
