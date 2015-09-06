@@ -22,17 +22,13 @@ class MyServiceActor extends Actor with MyService {
   def receive = runRoute(myRoute)
 }
 
-
-// this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService {
 
   val myRoute =
     path("game" / Segment / "begin" ) { seg =>
       get {
-        respondWithMediaType(`application/json`) {
-          complete {
-            Map("foo" -> "bar", "Say hello" -> "baz")
-          }
+        complete {
+          Map("foo" -> seg, "Say hello" -> "baz")
         }
       }
     }
