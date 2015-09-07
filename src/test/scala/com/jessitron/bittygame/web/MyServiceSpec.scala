@@ -1,6 +1,6 @@
 package com.jessitron.bittygame.web
 
-import com.jessitron.bittygame.crux.GameDefinition
+import com.jessitron.bittygame.crux.{Print, GameDefinition}
 import org.scalatest.ShouldMatchers
 import spray.testkit.ScalatestRouteTest
 import spray.http._
@@ -16,12 +16,6 @@ class MyServiceSpec extends org.scalatest.FunSpec
   
   describe ("MyService") {
 
-    it("return a greeting for GET requests to the root path") {
-      Get("/game/yolo/begin") ~> myRoute ~> check {
-        responseAs[String].contains("Say hello") should be(true)
-      }
-    }
-
     it("prints the welcome message") {
       val someGame = GameDefinition(Seq(), "Why hello there")
       import spray.json.DefaultJsonProtocol._
@@ -30,7 +24,7 @@ class MyServiceSpec extends org.scalatest.FunSpec
       }
 
       Get("/game/yolo/begin") ~> myRoute ~> check {
-        responseAs[String].contains("Why hello there") should be(true)
+        responseAs[GameResponse].instructions.results should contain(Print("Why hello there"))
       }
     }
 
