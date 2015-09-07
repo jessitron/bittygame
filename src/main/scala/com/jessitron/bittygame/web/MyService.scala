@@ -8,6 +8,7 @@ import MediaTypes._
 import spray.json._
 import spray.json.DefaultJsonProtocol._
 import spray.httpx.SprayJsonSupport._
+import com.jessitron.bittygame.serialization._
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
