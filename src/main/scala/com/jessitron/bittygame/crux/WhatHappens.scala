@@ -7,7 +7,9 @@ case class Print(message: MessageToThePlayer) extends ThingThatCanHappen {
 }
 case object ExitGame extends ThingThatCanHappen
 
-case class WhatHappens(results: Seq[ThingThatCanHappen])
+case class WhatHappens(results: Seq[ThingThatCanHappen]) {
+  def and(nextThing: ThingThatCanHappen) = this.copy(results = results :+ nextThing)
+}
 
 object WhatHappens {
   val NothingHappens = WhatHappens(Seq())
