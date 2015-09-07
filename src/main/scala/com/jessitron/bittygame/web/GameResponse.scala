@@ -9,5 +9,6 @@ import com.jessitron.bittygame.serialization._
  */
 case class GameResponse(state: GameState, instructions: WhatHappens)
 object GameResponse {
+  def apply(tuple: (GameState, WhatHappens)): GameResponse = GameResponse(tuple._1, tuple._2)
   implicit val format = jsonFormat2(apply)
 }

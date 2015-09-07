@@ -1,6 +1,7 @@
 package com.jessitron.bittygame.web
 
 import com.jessitron.bittygame.crux.{Print, GameDefinition}
+import com.jessitron.bittygame.web.ports.TrivialGameDefinitionDAO
 import org.scalatest.ShouldMatchers
 import spray.testkit.ScalatestRouteTest
 import spray.http._
@@ -13,6 +14,8 @@ class MyServiceSpec extends org.scalatest.FunSpec
                        with ShouldMatchers
                        with MyService {
   def actorRefFactory = system
+  val gameDefinitions = new TrivialGameDefinitionDAO()
+  val executionContext = scala.concurrent.ExecutionContext.global
   
   describe ("MyService") {
 

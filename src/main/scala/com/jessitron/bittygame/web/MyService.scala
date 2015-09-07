@@ -1,14 +1,15 @@
 package com.jessitron.bittygame.web
 
 import akka.actor.Actor
-import com.jessitron.bittygame.crux.{WhatHappens, GameState, GameDefinition}
+import com.jessitron.bittygame.crux.{Turn,GameDefinition}
+import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
 import spray.routing._
 import spray.http._
-import MediaTypes._
-import spray.json._
 import spray.json.DefaultJsonProtocol._
 import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
+
+import scala.concurrent.ExecutionContext
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
@@ -17,19 +18,24 @@ class MyServiceActor extends Actor with MyService {
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
   def actorRefFactory = context
+  val executionContext = context.dispatcher
 
-  // this actor only runs our route, but you could add
-  // other things here, like request stream processing
-  // or timeout handling
   def receive = runRoute(myRoute)
+
+  val gameDefinitions = new TrivialGameDefinitionDAO() // for realz, I'd put this in an actor
 }
 
 trait MyService extends HttpService {
 
+  implicit val executionContext: ExecutionContext
+  val gameDefinitions: GameDefinitionDAO
+
   private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
     get {
       complete {
-        GameResponse(GameState.init, WhatHappens.NothingHappens)
+        gameDefinitions.retrieve(seg).map { gameDef =>
+          GameResponse(Turn.firstTurn(gameDef))
+        }
       }
     }
   }
@@ -37,7 +43,7 @@ trait MyService extends HttpService {
   private val createGameDef: Route = path("game" / Segment) { seg =>
     entity(as[GameDefinition]) { gameDef =>
       put {
-        complete(StatusCodes.OK)
+        complete(gameDefinitions.save(seg, gameDef).map(_ => StatusCodes.Created))
       }
     }
   }
