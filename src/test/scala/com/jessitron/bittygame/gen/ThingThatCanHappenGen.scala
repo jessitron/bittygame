@@ -5,7 +5,11 @@ import org.scalacheck.{Gen, Arbitrary}
 
 trait ThingThatCanHappenGen {
 
-  val printGen = Gen.alphaStr.map(Print.apply)
+  val printGen =
+    for {
+      str <- Gen.alphaStr
+      if str.nonEmpty
+    } yield Print(str)
 
   val thingGen: Gen[ThingThatCanHappen] = Gen.oneOf(Gen.const(ExitGame), printGen)
 
