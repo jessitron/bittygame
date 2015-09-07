@@ -27,7 +27,7 @@ class MyServiceSpec extends org.scalatest.FunSpec
       }
 
       Get("/game/yolo/begin") ~> myRoute ~> check {
-        responseAs[GameResponse].instructions.results should contain(Print("Why hello there"))
+        responseAs[GameResponse].instructions should contain(Print("Why hello there"))
       }
     }
 
