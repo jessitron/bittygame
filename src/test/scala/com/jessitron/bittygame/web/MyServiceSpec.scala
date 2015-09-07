@@ -28,6 +28,10 @@ class MyServiceSpec extends org.scalatest.FunSpec
       Put("/game/yolo", someGame) ~> myRoute ~> check {
         status === Created
       }
+
+      Get("/game/yolo/begin") ~> myRoute ~> check {
+        responseAs[String].contains("Why hello there") should be(true)
+      }
     }
 
   }
