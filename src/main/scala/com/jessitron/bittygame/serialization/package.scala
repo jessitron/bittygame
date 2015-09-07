@@ -15,6 +15,6 @@ package object serialization {
       fields.toJson
     }
   }
-  implicit val playerActionFormat: JsonFormat[PlayerAction] = jsonFormat2(PlayerAction.apply)
-  implicit val gameDefinitionFormat: JsonFormat[GameDefinition] = jsonFormat2(GameDefinition.apply)
+  implicit val playerActionFormat: RootJsonFormat[PlayerAction] = jsonFormat2(PlayerAction.apply)
+  implicit val gameDefinitionFormat: RootJsonFormat[GameDefinition] = jsonFormat2(GameDefinition.apply)
 }
