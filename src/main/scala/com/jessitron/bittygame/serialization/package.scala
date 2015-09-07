@@ -15,7 +15,17 @@ package object serialization {
       fields.toJson
     }
 
-    override def read(json: JsValue): ThingThatCanHappen = ???
+    private def fail(why: String, json: JsValue): Nothing =
+      throw new RuntimeException(s"Could not deserialize ThingThatCanHappen; $why. Received:${json.prettyPrint}")
+
+    override def read(json: JsValue): ThingThatCanHappen = {
+      val mappy = json.convertTo[Map[String, String]]
+      mappy.getOrElse("type", fail("no type", json)) match {
+        case "exit"  => ExitGame
+        case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)))
+      }
+    }
+
   }
   implicit val playerActionFormat: RootJsonFormat[PlayerAction] = jsonFormat2(PlayerAction.apply)
   implicit val gameDefinitionFormat: RootJsonFormat[GameDefinition] = jsonFormat2(GameDefinition.apply)

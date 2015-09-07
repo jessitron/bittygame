@@ -21,4 +21,11 @@ class ThingsThatCanHappenSerializationSpec
     }
   }
 
+  // consider: making generic "round trip" property that prints the JSON on failure
+  property("Round trip") {
+    forAll { thing: ThingThatCanHappen =>
+      assert(thing === thing.toJson.convertTo[ThingThatCanHappen])
+    }
+  }
+
 }
