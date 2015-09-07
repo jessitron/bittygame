@@ -23,6 +23,8 @@ class MyServiceActor extends Actor with MyService {
   def receive = runRoute(myRoute)
 
   val gameDefinitions = new TrivialGameDefinitionDAO() // for realz, I'd put this in an actor
+
+  gameDefinitions.save("hungover", com.jessitron.bittygame.games.Hungover.gameDef)
 }
 
 trait MyService extends HttpService {
