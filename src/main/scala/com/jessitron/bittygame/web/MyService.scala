@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.web
 
 import akka.actor.Actor
-import com.jessitron.bittygame.crux.GameDefinition
+import com.jessitron.bittygame.crux.{WhatHappens, GameState, GameDefinition}
 import spray.routing._
 import spray.http._
 import MediaTypes._
@@ -29,7 +29,7 @@ trait MyService extends HttpService {
   private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
     get {
       complete {
-        Map("foo" -> seg, "Say hello" -> "baz")
+        GameResponse(GameState.init, WhatHappens.NothingHappens)
       }
     }
   }
@@ -37,7 +37,6 @@ trait MyService extends HttpService {
   private val createGameDef: Route = path("game" / Segment) { seg =>
     entity(as[GameDefinition]) { gameDef =>
       put {
-
         complete(StatusCodes.OK)
       }
     }
