@@ -5,7 +5,6 @@ import org.scalatest.ShouldMatchers
 import spray.testkit.ScalatestRouteTest
 import spray.http._
 import spray.httpx.SprayJsonSupport._
-import spray.json._
 import com.jessitron.bittygame.serialization._
 import StatusCodes._
 

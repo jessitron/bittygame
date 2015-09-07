@@ -1,7 +1,6 @@
 package com.jessitron.bittygame.serialization
 
 import com.jessitron.bittygame.crux.ThingThatCanHappen
-import org.scalacheck.Shrink
 import org.scalatest.{Assertions, PropSpec}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
