@@ -29,7 +29,7 @@ class StartGameTest extends PropSpec with GeneratorDrivenPropertyChecks with Ass
     // right now all options are available, so this is the same as "there are no options"
     forAll { gameDef : GameDefinition =>
       val gameWithoutOptions = gameDef.copy(possibilities = Seq())
-      val (_, happenings) = Turn.firstTurn(gameDef)
+      val (_, happenings) = Turn.firstTurn(gameWithoutOptions)
       assert(happenings.results.contains(ExitGame))
     }
   }
@@ -40,7 +40,7 @@ class StartGameTest extends PropSpec with GeneratorDrivenPropertyChecks with Ass
         val (_, happenings) = Turn.firstTurn(gameDef)
         val anythingAvailable: Boolean = gameDef.possibilities.exists(_.available(gameState))
         val autoExit: Boolean = happenings.results.contains(ExitGame)
-        assert(autoExit === !anythingAvailable,
+        assert(autoExit == !anythingAvailable,
           s"Should only exit if no options are available. Exiting? $autoExit Available? $anythingAvailable")
       }
     }

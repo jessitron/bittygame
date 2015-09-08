@@ -4,8 +4,15 @@ import WhatHappens._
 
 object Turn {
 
-  def firstTurn(gameDef: GameDefinition): (GameState, WhatHappens) =
-    (GameState.init, thisHappens(Print(gameDef.welcome)).and(ExitGame))
+  def firstTurn(gameDef: GameDefinition): (GameState, WhatHappens) = {
+    val initialState = GameState.init
+    val print = Print(gameDef.welcome)
+    val exit = if (availableOptions(gameDef, initialState).isEmpty) Some(ExitGame) else None
+    (initialState, thisHappens(print).andMaybe(exit))
+  }
+
+  private def availableOptions(gameDef: GameDefinition, gameState: GameState): Seq[PlayerAction] =
+    gameDef.possibilities.filter(_.available(gameState))
 
   def act(gameDef: GameDefinition)
          (previousState: GameState, playerTyped: String): (GameState, WhatHappens) = {

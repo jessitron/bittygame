@@ -8,6 +8,12 @@ case class Print(message: MessageToThePlayer) extends ThingThatCanHappen {
 case object ExitGame extends ThingThatCanHappen
 
 case class WhatHappens(results: Seq[ThingThatCanHappen]) {
+  def andMaybe(mightHappen: Option[ThingThatCanHappen]): WhatHappens =
+    mightHappen match {
+      case None => this
+      case Some(thing) => this.and(thing)
+    }
+
   def and(nextThing: ThingThatCanHappen) = this.copy(results = results :+ nextThing)
 }
 
