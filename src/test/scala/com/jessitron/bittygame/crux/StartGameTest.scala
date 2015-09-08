@@ -34,4 +34,17 @@ class StartGameTest extends PropSpec with GeneratorDrivenPropertyChecks with Ass
     }
   }
 
+  property("If there are available options") {
+    forAll { gameDef : GameDefinition =>
+      forAll(gameStateGen(gameDef)) { gameState : GameState =>
+      // I could do this two ways: add an available option, or filter
+      whenever(GameDefinition.availablePossibilities(gameDef, gameState).nonEmpty) {
+        val (_, happenings) = Turn.firstTurn(gameDef)
+        assert(!happenings.results.contains(ExitGame))
+      }
+    }
+    }
+
+  }
+
 }
