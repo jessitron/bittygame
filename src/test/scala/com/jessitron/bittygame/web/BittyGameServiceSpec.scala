@@ -9,10 +9,10 @@ import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
 import StatusCodes._
 
-class MyServiceSpec extends org.scalatest.FunSpec
+class BittyGameServiceSpec extends org.scalatest.FunSpec
                        with ScalatestRouteTest
                        with ShouldMatchers
-                       with MyService {
+                       with BittyGameService {
   def actorRefFactory = system
   val gameDefinitions = new TrivialGameDefinitionDAO()
   val executionContext = scala.concurrent.ExecutionContext.global

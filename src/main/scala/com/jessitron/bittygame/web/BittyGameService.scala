@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
-class MyServiceActor extends Actor with MyService {
+class BittyGameServiceActor extends Actor with BittyGameService {
 
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -27,7 +27,7 @@ class MyServiceActor extends Actor with MyService {
   gameDefinitions.save("hungover", com.jessitron.bittygame.games.Hungover.gameDef)
 }
 
-trait MyService extends HttpService {
+trait BittyGameService extends HttpService {
 
   implicit val executionContext: ExecutionContext
   val gameDefinitions: GameDefinitionDAO
