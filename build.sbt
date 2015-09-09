@@ -17,7 +17,7 @@ libraryDependencies ++= {
     "com.typesafe.akka"   %%  "akka-actor"    % akkaV,
     "com.typesafe.akka"   %%  "akka-testkit"  % akkaV    % "test",
     "org.scalatest"       %%  "scalatest"     % "2.2.4"  % "test",
-    "org.scalacheck"      %%  "scalacheck"    % "1.12.4" % "test"
+    "org.scalacheck"      %%  "scalacheck"    % "1.12.4"
   )
 }
 

@@ -1,0 +1,10 @@
+bacon
+monkey
+spider
+carrot
+banana
+lizard
+sword
+table
+battery
+potato

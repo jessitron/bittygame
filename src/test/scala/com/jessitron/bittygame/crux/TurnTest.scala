@@ -1,5 +1,8 @@
 package com.jessitron.bittygame.crux
 
-class TurnTest extends org.scalatest.FunSuite {
+import org.scalatest.{Assertions, PropSpec}
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+
+class TurnTest extends PropSpec with GeneratorDrivenPropertyChecks with Assertions {
 
 }
