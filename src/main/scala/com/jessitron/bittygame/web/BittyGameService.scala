@@ -49,7 +49,7 @@ trait BittyGameService extends HttpService {
   }
 
   private val createRandomGame: Route = path ("random") {
-    put {
+    (get | put) {
       complete {
         val newName = RandomGame.name(gameDefinitions.names())
         gameDefinitions.save(newName, RandomGame.create()).map(

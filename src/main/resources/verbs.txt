@@ -4,3 +4,4 @@ smash
 throw
 hide
 overturn
+kill
