@@ -25,8 +25,8 @@ package object serialization {
         case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)))
       }
     }
-
   }
+
   implicit val playerActionFormat: RootJsonFormat[PlayerAction] = jsonFormat2(PlayerAction.apply)
   implicit val gameDefinitionFormat: RootJsonFormat[GameDefinition] = jsonFormat2(GameDefinition.apply)
 
