@@ -8,3 +8,5 @@ kill
 fire
 pull
 cut
+jump over
+talk to

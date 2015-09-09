@@ -21,4 +21,13 @@ class FirstTurnProperties
       }
     }
   }
+
+  /* I was running 'begin $(random)' in the command line,
+   * and I got a 404. But it didn't print what game it hit so
+   * I don't know what input caused that.
+   * Perfect for a property test!
+   */
+  property("any game created by random, I can take a first turn") {
+    
+  }
 }

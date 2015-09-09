@@ -7,8 +7,9 @@ lizard
 sword
 table
 battery
-potato
+foxtato
 the party cannon
 dog
 teacher
 Rich Hickey's hair
+the pit
