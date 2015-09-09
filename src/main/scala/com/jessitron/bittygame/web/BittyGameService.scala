@@ -12,6 +12,7 @@ import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 class BittyGameServiceActor extends Actor with BittyGameService {
 
@@ -32,17 +33,12 @@ trait BittyGameService extends HttpService {
 
   private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
     get {
-      import spray.json._
-      implicit val stupid: RootJsonFormat[JsValue] = new RootJsonFormat[JsValue] {
-        override def write(obj: JsValue): JsValue = obj
-        override def read(json: JsValue): JsValue = json
+      def theFutureIsGreat = gameDefinitions.retrieve(seg).map { gameDef =>
+        GameResponse(Turn.firstTurn(gameDef))
       }
-      complete {
-        gameDefinitions.retrieve(seg).map { gameDef =>
-          StatusCodes.OK -> GameResponse(Turn.firstTurn(gameDef)).toJson
-        }.recover {
-          case e: GameDefinitionDAO.NotFoundException => StatusCodes.NotFound -> Seq("fart!").toJson
-        }
+      onComplete(theFutureIsGreat) {
+          case Success(yay) => complete(yay)
+          case Failure(t: GameDefinitionDAO.NotFoundException) => complete(StatusCodes.NotFound)
       }
     }
   }
