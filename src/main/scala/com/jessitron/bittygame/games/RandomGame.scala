@@ -13,8 +13,9 @@ object RandomGame {
   lazy val defaultGameGen = new RandomGame(
     readResource("/firstPartOfSentence.txt"),
     readResource("/secondPartOfSentence.txt"),
-    readResource("/verbs.txt"),
-    readResource("/nouns.txt"))
+    readResource("/nouns.txt"),
+    readResource("/verbs.txt")
+  )
   lazy val defaultNamer = new RandomName(readResource("/names.txt"))
 
   def create() = defaultGameGen.create()
@@ -52,8 +53,8 @@ class RandomGame(firstPartsOfSentence: Seq[String],
   } yield sentences.mkString(". ")
 
   private def funAction: Gen[PlayerAction] = for {
-    verb <- Gen.oneOf("take", "open", verbs)
-    noun <- Gen.oneOf("door", "book", nouns)
+    verb <- Gen.oneOf("take", "open", verbs:_*)
+    noun <- Gen.oneOf("door", "book", nouns:_*)
     message <- funMessage(3)
   } yield PlayerAction(s"$verb $noun", message)
 

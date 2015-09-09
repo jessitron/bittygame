@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.web
 
 import akka.actor.Actor
-import com.jessitron.bittygame.crux.{Turn,GameDefinition}
+import com.jessitron.bittygame.crux.{GameState, Turn, GameDefinition}
 import com.jessitron.bittygame.games.RandomGame
 import com.jessitron.bittygame.web.messages.{CreateRandomGameResponse, GameResponse}
 import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
@@ -36,9 +36,25 @@ trait BittyGameService extends HttpService {
       def theFutureIsGreat = gameDefinitions.retrieve(seg).map { gameDef =>
         GameResponse(Turn.firstTurn(gameDef))
       }
-      onComplete(theFutureIsGreat) {
+      onComplete(theFutureIsGreat)  {
+        case Success(yay) => complete(yay)
+        case Failure(t: GameDefinitionDAO.NotFoundException) => complete(StatusCodes.NotFound)
+      }
+    }
+  }
+
+  private val think: Route = path("game" / Segment / "think") { seg =>
+    post {
+      entity(as[GameState]) { state =>
+        def stuff = gameDefinitions.retrieve(seg).map { gameDef =>
+          gameDef.possibilities.map {
+            _.trigger
+          }
+        }
+        onComplete(stuff) {
           case Success(yay) => complete(yay)
-          case Failure(t: GameDefinitionDAO.NotFoundException) => complete(StatusCodes.NotFound)
+          case Failure(t: GameDefinitionDAO.NotFoundException) => complete(StatusCodes.NotFound, "thanks for trying")
+        }
       }
     }
   }
@@ -63,5 +79,5 @@ trait BittyGameService extends HttpService {
   }
 
   val myRoute =
-    firstTurn ~ createGameDef ~ createRandomGame
+    firstTurn ~ createGameDef ~ createRandomGame ~ think
 }

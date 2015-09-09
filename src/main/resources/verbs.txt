@@ -6,3 +6,5 @@ hide
 overturn
 kill
 fire
+pull
+cut

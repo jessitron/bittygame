@@ -9,3 +9,6 @@ table
 battery
 potato
 the party cannon
+dog
+teacher
+Rich Hickey's hair
