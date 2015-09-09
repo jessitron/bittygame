@@ -11,12 +11,8 @@ import com.jessitron.bittygame.serialization._
 
 import scala.concurrent.ExecutionContext
 
-// we don't implement our route structure directly in the service actor because
-// we want to be able to test it independently, without having to spin up an actor
 class BittyGameServiceActor extends Actor with BittyGameService {
 
-  // the HttpService trait defines only one abstract member, which
-  // connects the services environment to the enclosing actor or test
   def actorRefFactory = context
   val executionContext = context.dispatcher
 
