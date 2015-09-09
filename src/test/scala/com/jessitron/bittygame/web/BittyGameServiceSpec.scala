@@ -11,26 +11,21 @@ import com.jessitron.bittygame.serialization._
 import StatusCodes._
 
 class BittyGameServiceSpec extends org.scalatest.FunSpec
-                       with ScalatestRouteTest
                        with ShouldMatchers
-                       with BittyGameService {
-  def actorRefFactory = system
-  val gameDefinitions = new TrivialGameDefinitionDAO()
-  val executionContext = scala.concurrent.ExecutionContext.global
-  
-  describe ("MyService") {
+                       with BittyGameServiceTestiness {
+
+  describe ("the first turn") {
 
     it("prints the welcome message") {
       val someGame = GameDefinition(Seq(), "Why hello there")
       import spray.json.DefaultJsonProtocol._
       Put("/game/yolo", someGame) ~> myRoute ~> check {
-        status === Created
+        status should be(Created)
       }
 
       Get("/game/yolo/begin") ~> myRoute ~> check {
         responseAs[GameResponse].instructions should contain(Print("Why hello there"))
       }
     }
-
   }
 }
