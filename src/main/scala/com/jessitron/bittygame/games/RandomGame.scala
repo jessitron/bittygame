@@ -24,10 +24,16 @@ object RandomGame {
 }
 
 class RandomName(names: Seq[String]) {
-  val nameGen = Gen.oneOf("pinkiepie", "heidegger", names:_*)
+  val nameGen = for {
+    happyName <- Gen.oneOf("pinkiepie", "heidegger", names:_*)
+    stupidNumber <- Gen.choose(1, 10000)
+  } yield s"$happyName$stupidNumber"
 
-  def name(excluding: Seq[String]): GameDefinitionKey =
+  def name(excluding: Seq[String]): GameDefinitionKey = try {
     Util.untilYouGetOne(nameGen.suchThat(!excluding.contains(_)).sample)
+  } catch {
+    case t : RuntimeException => throw new RuntimeException (s"excluded: $excluding", t)
+  }
 }
 
 class RandomGame(firstPartsOfSentence: Seq[String],
