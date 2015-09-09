@@ -1,6 +1,7 @@
 package com.jessitron.bittygame.web
 
 import com.jessitron.bittygame.crux.{Print, GameDefinition}
+import com.jessitron.bittygame.web.messages.GameResponse
 import com.jessitron.bittygame.web.ports.TrivialGameDefinitionDAO
 import org.scalatest.ShouldMatchers
 import spray.testkit.ScalatestRouteTest

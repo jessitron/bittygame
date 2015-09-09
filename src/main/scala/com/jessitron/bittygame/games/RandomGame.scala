@@ -11,11 +11,11 @@ import scala.io.Source
 object RandomGame {
   import Util._
   lazy val defaultGameGen = new RandomGame(
-    readResource("firstPartOfSentence.txt"),
-    readResource("secondPartOfSentence.txt"),
-    readResource("verbs.txt"),
-    readResource("nouns.txt"))
-  lazy val defaultNamer = new RandomName(readResource("names.txt"))
+    readResource("/firstPartOfSentence.txt"),
+    readResource("/secondPartOfSentence.txt"),
+    readResource("/verbs.txt"),
+    readResource("/nouns.txt"))
+  lazy val defaultNamer = new RandomName(readResource("/names.txt"))
 
   def create() = defaultGameGen.create()
 
@@ -54,7 +54,7 @@ class RandomGame(firstPartsOfSentence: Seq[String],
   private def funGameGen(size: Int) : Gen[GameDefinition] = for {
     welcomeMessage <- funMessage(5)
     actions <- Gen.listOfN(size, funAction)
-  } GameDefinition(actions, welcomeMessage)
+  } yield GameDefinition(actions, welcomeMessage)
 
   def create(): GameDefinition = Util.untilYouGetOne(funGameGen(10).sample)
 
@@ -66,7 +66,7 @@ object Util {
   def readResource(name: String): Seq[String] = {
     val source = Source.fromURL(this.getClass().getResource(name))
     try {
-      source.getLines().toSeq
+      source.getLines().toList
     } finally {
       source.close()
     }

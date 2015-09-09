@@ -1,8 +1,8 @@
-package com.jessitron.bittygame.web
+package com.jessitron.bittygame.web.messages
 
-import com.jessitron.bittygame.crux.{ThingThatCanHappen, GameState, WhatHappens}
-import spray.json.DefaultJsonProtocol._
+import com.jessitron.bittygame.crux.{GameState, ThingThatCanHappen, WhatHappens}
 import com.jessitron.bittygame.serialization._
+import spray.json.DefaultJsonProtocol._
 
 /*
  * this is used only in the web, to group these two things.
