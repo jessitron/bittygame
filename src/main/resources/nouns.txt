@@ -8,3 +8,4 @@ sword
 table
 battery
 potato
+the party cannon

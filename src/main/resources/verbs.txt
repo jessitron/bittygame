@@ -5,3 +5,4 @@ throw
 hide
 overturn
 kill
+fire
