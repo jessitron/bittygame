@@ -17,6 +17,7 @@ trait GameDefinitionDAO {
 object GameDefinitionDAO {
   type GameDefinitionKey = String
   type SaveResult = Unit
+  class NotFoundException(msg: String) extends Exception(msg)
 }
 
 class TrivialGameDefinitionDAO extends GameDefinitionDAO {
@@ -24,7 +25,7 @@ class TrivialGameDefinitionDAO extends GameDefinitionDAO {
   override def retrieve(name: GameDefinitionKey): Future[GameDefinition] =
     gameDefCache.get(name) match {
       case Some(d) => Future.successful(d)
-      case None => Future.failed(new RuntimeException(s"Undefined game: $name"))
+      case None => Future.failed(new GameDefinitionDAO.NotFoundException(s"Undefined game: $name"))
     }
   override def save(name: GameDefinitionKey, gameDef: GameDefinition): Future[SaveResult] = {
     gameDefCache = gameDefCache + (name -> gameDef)
@@ -33,3 +34,4 @@ class TrivialGameDefinitionDAO extends GameDefinitionDAO {
 
   override def names(): Seq[GameDefinitionKey] = gameDefCache.keys.toSeq
 }
+

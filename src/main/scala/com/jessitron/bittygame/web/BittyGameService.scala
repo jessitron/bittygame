@@ -32,9 +32,16 @@ trait BittyGameService extends HttpService {
 
   private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
     get {
+      import spray.json._
+      implicit val stupid: RootJsonFormat[JsValue] = new RootJsonFormat[JsValue] {
+        override def write(obj: JsValue): JsValue = obj
+        override def read(json: JsValue): JsValue = json
+      }
       complete {
         gameDefinitions.retrieve(seg).map { gameDef =>
-          GameResponse(Turn.firstTurn(gameDef))
+          StatusCodes.OK -> GameResponse(Turn.firstTurn(gameDef)).toJson
+        }.recover {
+          case e: GameDefinitionDAO.NotFoundException => StatusCodes.NotFound -> Seq("fart!").toJson
         }
       }
     }
