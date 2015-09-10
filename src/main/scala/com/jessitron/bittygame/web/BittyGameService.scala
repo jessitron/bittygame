@@ -33,8 +33,9 @@ trait BittyGameService extends HttpService {
   val gameDefinitions: GameDefinitionDAO
 
   private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
+    val gameName = java.net.URLDecoder.decode(seg, "UTF-8")
     get {
-      def theFutureIsGreat = gameDefinitions.retrieve(seg).map { gameDef =>
+      def theFutureIsGreat = gameDefinitions.retrieve(gameName).map { gameDef =>
         GameResponse(Turn.firstTurn(gameDef))
       }
       onComplete(theFutureIsGreat)  {
