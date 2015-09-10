@@ -4,6 +4,7 @@ import akka.actor.Actor
 import com.jessitron.bittygame.crux.{GameState, Turn, GameDefinition}
 import com.jessitron.bittygame.games.RandomGame
 import com.jessitron.bittygame.web.messages.{CreateRandomGameResponse, GameResponse}
+import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
 import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
 import spray.routing._
 import spray.http._
@@ -72,10 +73,14 @@ trait BittyGameService extends HttpService {
       complete {
         val newName = RandomGame.name(gameDefinitions.names())
         gameDefinitions.save(newName, RandomGame.create()).map(
-          _ => CreateRandomGameResponse(newName, s"/game/${java.net.URLEncoder.encode(newName, "UTF-8")}/begin")
+          _ => CreateRandomGameResponse(newName, firstTurnUrl(newName))
         ).map( x => StatusCodes.Created -> x)
       }
     }
+  }
+
+  def firstTurnUrl(name: GameDefinitionKey): String = {
+    s"/game/${java.net.URLEncoder.encode(name, "UTF-8")}/begin"
   }
 
   val myRoute =

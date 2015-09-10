@@ -1,8 +1,11 @@
 package com.jessitron.bittygame.web
 
+import com.jessitron.bittygame.web.messages.CreateRandomGameResponse
 import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
 import org.scalatest.{PropSpec, Assertions}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import spray.httpx.SprayJsonSupport._
+import com.jessitron.bittygame.serialization._
 import com.jessitron.bittygame.gen._
 import spray.http.StatusCodes
 
@@ -28,6 +31,13 @@ class FirstTurnProperties
    * Perfect for a property test!
    */
   property("any game created by random, I can take a first turn") {
-    
+    forAll { i: Int => // it doesn't really matter what it is
+      Get("/random") ~> myRoute ~> check {
+        val goFirst = responseAs[CreateRandomGameResponse].first_turn_url
+        Get(goFirst) ~> myRoute ~> check {
+          assert(status === StatusCodes.OK, s"Game name was $goFirst")
+        }
+      }
+    }
   }
 }
