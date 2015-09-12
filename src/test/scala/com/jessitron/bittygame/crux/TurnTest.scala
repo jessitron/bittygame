@@ -8,9 +8,9 @@ object TurnTest extends org.scalacheck.Properties("Taking a turn") {
 
   property("Victory actions result in exit") =
     Prop.forAll(gameAndStateGen, triggerGen, messageGen ) { (gameAndState, trigger, message) =>
-      val (gameDef, gameState) = gameAndState
-      val victoryAction = PlayerAction.victory(trigger, message)
-      gameDef.addPossibility(victoryAction)
+      val (someGame, gameState) = gameAndState
+
+      val gameDef = someGame.addPossibility(PlayerAction.victory(trigger, message))
 
       val (newState, happenings) = Turn.act(gameDef)(gameState, trigger)
 
