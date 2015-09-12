@@ -16,7 +16,10 @@ object Turn {
 
   def act(gameDef: GameDefinition)
          (previousState: GameState, playerTyped: String): (GameState, WhatHappens) = {
-    (previousState, NothingHappens)
+    gameDef.possibilities.find(_.triggeredBy(playerTyped)) match {
+      case Some(action) => (previousState, action.results)
+      case None => (previousState, NothingHappens)
+    }
   }
 
 }

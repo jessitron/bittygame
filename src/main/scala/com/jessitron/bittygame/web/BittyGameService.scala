@@ -6,6 +6,7 @@ import com.jessitron.bittygame.games.RandomGame
 import com.jessitron.bittygame.web.messages.{CreateRandomGameResponse, GameResponse}
 import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
 import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
+import spray.http.HttpHeaders.`Access-Control-Allow-Origin`
 import spray.routing._
 import spray.http._
 import spray.json.DefaultJsonProtocol._
@@ -28,6 +29,8 @@ class BittyGameServiceActor extends Actor with BittyGameService {
 }
 
 trait BittyGameService extends HttpService {
+
+  private val allowOriginHeader = `Access-Control-Allow-Origin`(AllOrigins)
 
   implicit val executionContext: ExecutionContext
   val gameDefinitions: GameDefinitionDAO
@@ -85,5 +88,5 @@ trait BittyGameService extends HttpService {
   }
 
   val myRoute =
-    firstTurn ~ createGameDef ~ createRandomGame ~ think
+    respondWithHeaders(allowOriginHeader) { firstTurn ~ createGameDef ~ createRandomGame ~ think }
 }

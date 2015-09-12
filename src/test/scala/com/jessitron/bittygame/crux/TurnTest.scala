@@ -1,8 +1,20 @@
 package com.jessitron.bittygame.crux
 
-import org.scalatest.{Assertions, PropSpec}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import com.jessitron.bittygame.gen._
+import org.scalacheck.Prop
+import org.scalacheck.Prop.BooleanOperators
 
-class TurnTest extends PropSpec with GeneratorDrivenPropertyChecks with Assertions {
+object TurnTest extends org.scalacheck.Properties("Taking a turn") {
+
+  property("Victory actions result in exit") =
+    Prop.forAll(gameAndStateGen, triggerGen, messageGen ) { (gameAndState, trigger, message) =>
+      val (gameDef, gameState) = gameAndState
+      val victoryAction = PlayerAction.victory(trigger, message)
+      gameDef.addPossibility(victoryAction)
+
+      val (newState, happenings) = Turn.act(gameDef)(gameState, trigger)
+
+      happenings.results.contains(ExitGame) :| s"the results were ${happenings.results}"
+    }
 
 }

@@ -1,16 +1,31 @@
 package com.jessitron.bittygame.gen
 
-import com.jessitron.bittygame.crux.{PlayerAction, GameDefinition}
+import com.jessitron.bittygame.crux.{MessageToThePlayer, Trigger, PlayerAction, GameDefinition}
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 
-trait GameDefinitionGen {
-  
-  val playerActionGen: Gen[PlayerAction] = for {
-    trigger <- Gen.alphaStr
-    message <- Gen.alphaStr
-  } yield PlayerAction(trigger, message)
-  
+trait PlayerActionGen {
+
+  val triggerGen: Gen[Trigger] = Gen.alphaStr.suchThat(_.nonEmpty)
+
+  val messageGen: Gen[MessageToThePlayer] = Gen.alphaStr.suchThat(_.nonEmpty)
+
+  val victoryActionGen: Gen[PlayerAction] =
+  for {
+    trigger <- triggerGen
+    message <- messageGen
+  } yield PlayerAction.victory(trigger, message)
+
+  val printActionGen: Gen[PlayerAction] = for {
+    trigger <- triggerGen
+    message <- messageGen
+  } yield PlayerAction.printing(trigger, message)
+
+  val playerActionGen = Gen.frequency((4,printActionGen), (1,victoryActionGen))
+}
+
+trait GameDefinitionGen extends PlayerActionGen {
+
   val possibilitiesGen: Gen[Seq[PlayerAction]] = Gen.listOf(playerActionGen)
 
   val welcomeMessageGen = Gen.alphaStr.withFilter(_.nonEmpty)
