@@ -3,7 +3,7 @@ package com.jessitron.bittygame.web
 import akka.actor.Actor
 import com.jessitron.bittygame.crux.{GameState, Turn, GameDefinition}
 import com.jessitron.bittygame.games.RandomGame
-import com.jessitron.bittygame.web.messages.{CreateRandomGameResponse, GameResponse}
+import com.jessitron.bittygame.web.messages.{GameTurn, CreateRandomGameResponse, GameResponse}
 import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
 import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
 import spray.http.HttpHeaders.`Access-Control-Allow-Origin`
@@ -44,6 +44,15 @@ trait BittyGameService extends HttpService {
       }
       handleNotFound("boo hoo")(theFutureIsGreat)
     }
+  }
+
+  private val act : Route = path("game" / Segment / "turn") {
+    gameName =>
+      post {
+        entity(as[GameTurn]) { turn =>
+          complete(StatusCodes.OK)
+        }
+      }
   }
 
   private def handleNotFound[X <% ToResponseMarshallable](complaint: String)(x: Future[X]) =
@@ -90,5 +99,5 @@ trait BittyGameService extends HttpService {
   }
 
   val myRoute =
-    respondWithHeaders(allowOriginHeader) { firstTurn ~ createGameDef ~ createRandomGame ~ think }
+    respondWithHeaders(allowOriginHeader) { firstTurn ~ act ~ createGameDef ~ createRandomGame ~ think }
 }
