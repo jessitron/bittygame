@@ -7,13 +7,14 @@ import com.jessitron.bittygame.web.messages.{CreateRandomGameResponse, GameRespo
 import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
 import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
 import spray.http.HttpHeaders.`Access-Control-Allow-Origin`
+import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing._
 import spray.http._
 import spray.json.DefaultJsonProtocol._
 import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import scala.util.{Failure, Success}
 
 class BittyGameServiceActor extends Actor with BittyGameService {
@@ -41,12 +42,16 @@ trait BittyGameService extends HttpService {
       def theFutureIsGreat = gameDefinitions.retrieve(gameName).map { gameDef =>
         GameResponse(Turn.firstTurn(gameDef))
       }
-      onComplete(theFutureIsGreat)  {
-        case Success(yay) => complete(yay)
-        case Failure(t: GameDefinitionDAO.NotFoundException) => complete(StatusCodes.NotFound)
-      }
+      handleNotFound("boo hoo")(theFutureIsGreat)
     }
   }
+
+  private def handleNotFound[X <% ToResponseMarshallable](complaint: String)(x: Future[X]) =
+    onComplete(x) {
+      case Success(yay) => complete(yay)
+      case Failure(t: GameDefinitionDAO.NotFoundException) =>
+        complete(StatusCodes.NotFound, complaint)
+    }
 
   private val think: Route = path("game" / Segment / "think") { seg =>
     post {
@@ -56,10 +61,7 @@ trait BittyGameService extends HttpService {
             _.trigger
           }
         }
-        onComplete(stuff) {
-          case Success(yay) => complete(yay)
-          case Failure(t: GameDefinitionDAO.NotFoundException) => complete(StatusCodes.NotFound, "thanks for trying")
-        }
+       handleNotFound("darn it")(stuff)
       }
     }
   }
