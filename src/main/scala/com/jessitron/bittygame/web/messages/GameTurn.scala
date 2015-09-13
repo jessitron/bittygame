@@ -5,7 +5,7 @@ import spray.json.DefaultJsonProtocol._
 import com.jessitron.bittygame.serialization._
 import spray.json._
 
-case class GameTurn(typed: String, state: GameState)
+case class GameTurn(playerMove: String, state: GameState)
 object GameTurn {
   implicit val format = jsonFormat2(apply)
 }

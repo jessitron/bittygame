@@ -52,10 +52,14 @@ trait BittyGameService extends HttpService {
       post {
         entity(as[GameTurn]) { turn =>
           val fo = gameDefinitions.retrieve(gameName) map { gameDef =>
-            Turn.act(gameDef)(turn.state, turn.typed)
-          }
+            Turn.act(gameDef)(turn.state, turn.playerMove)
+          } map GameResponse.apply
           handleNotFound("turn poo")(fo)
         }
+      } ~
+      options {
+        // NO REALLY IT'S OK
+        respondWithHeaders(allowOrdinaryHeaders) { complete(StatusCodes.OK) }
       }
   }
 
