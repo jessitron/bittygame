@@ -18,7 +18,7 @@ object Boot extends App {
 
   val port: Int =
   try {
-    Integer.parseInt(System.getProperty("PORT"))}
+    Integer.parseInt(System.getProperty("http.port"))}
   catch {
     case e: NumberFormatException => 80
    }
