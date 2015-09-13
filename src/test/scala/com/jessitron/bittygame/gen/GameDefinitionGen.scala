@@ -30,7 +30,7 @@ trait GameDefinitionGen extends PlayerActionGen {
 
   val possibilitiesGen: Gen[Seq[PlayerAction]] = Gen.listOf(playerActionGen)
 
-  val welcomeMessageGen = Gen.alphaStr.withFilter(_.nonEmpty)
+  val welcomeMessageGen: Gen[MessageToThePlayer] = Gen.alphaStr.suchThat(_.nonEmpty)
 
   val gameDefGen = for {
     possibilities <- possibilitiesGen

@@ -1,7 +1,8 @@
 package com.jessitron.bittygame.web
 
-import com.jessitron.bittygame.crux.{PlayerAction, Print, GameDefinition}
+import com.jessitron.bittygame.crux.{MessageToThePlayer, PlayerAction, Print, GameDefinition}
 import com.jessitron.bittygame.web.messages.GameResponse
+import org.scalacheck.Arbitrary
 import org.scalatest.ShouldMatchers
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import spray.http._
@@ -17,8 +18,10 @@ class BittyGameServiceSpec extends org.scalatest.PropSpec
                        with BittyGameServiceTestiness {
 
   property ("the first turn prints the welcome message") {
-    forAll { (someActions: Seq[PlayerAction],
-              message: String) =>
+    forAll(possibilitiesGen,
+           welcomeMessageGen)
+    { (someActions: Seq[PlayerAction],
+              message: MessageToThePlayer) =>
       val someGame = GameDefinition(Seq(), message)
       Put("/game/yolo", someGame) ~> myRoute ~> check {
         status should be(Created)
