@@ -17,14 +17,15 @@ class BittyGameServiceSpec extends org.scalatest.PropSpec
                        with BittyGameServiceTestiness {
 
   property ("the first turn prints the welcome message") {
-    forAll { someActions: Seq[PlayerAction] =>
-      val someGame = GameDefinition(Seq(), "Why hello there")
+    forAll { (someActions: Seq[PlayerAction],
+              message: String) =>
+      val someGame = GameDefinition(Seq(), message)
       Put("/game/yolo", someGame) ~> myRoute ~> check {
         status should be(Created)
       }
 
       Get("/game/yolo/begin") ~> myRoute ~> check {
-        responseAs[GameResponse].instructions should contain(Print("Why hello there"))
+        responseAs[GameResponse].instructions should contain(Print(message))
       }
     }
   }
