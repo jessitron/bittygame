@@ -10,7 +10,7 @@ object PlayerAction {
   def printing(trigger: Trigger, printedResponse: MessageToThePlayer) =
     PlayerAction(trigger, thisHappens(Print(printedResponse)))
   def victory(trigger: Trigger, printed: MessageToThePlayer) =
-    PlayerAction(trigger, thisHappens(Print(printed)).and(ExitGame))
+    PlayerAction(trigger, thisHappens(Print(printed)).and(Win).and(ExitGame))
 }
 
 case class GameDefinition(possibilities: Seq[PlayerAction],

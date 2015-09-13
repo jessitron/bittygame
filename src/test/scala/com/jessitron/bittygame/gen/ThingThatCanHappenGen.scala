@@ -11,7 +11,12 @@ trait ThingThatCanHappenGen {
       if str.nonEmpty
     } yield Print(str)
 
-  val thingGen: Gen[ThingThatCanHappen] = Gen.oneOf(Gen.const(ExitGame), printGen)
+  val thingGen: Gen[ThingThatCanHappen] =
+    Gen.oneOf(
+      Gen.const(ExitGame),
+      printGen,
+      Gen.const(Win)
+    )
 
   implicit val arbThing: Arbitrary[ThingThatCanHappen] = Arbitrary(thingGen)
 
