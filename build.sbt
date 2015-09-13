@@ -1,10 +1,16 @@
+import NativePackagerKeys._
+
+name := "bittygame-server"
+
 organization  := "com.jessitron"
 
 version       := "0.1"
 
 scalaVersion  := "2.11.6"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+// enablePlugins(JavaAppPackaging)
+
+packageArchetype.java_application
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
