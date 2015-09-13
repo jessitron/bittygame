@@ -8,22 +8,18 @@ import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
 import StatusCodes._
 
-class BittyGameServiceSpec extends org.scalatest.FunSpec
+class BittyGameServiceSpec extends org.scalatest.PropSpec
                        with ShouldMatchers
                        with BittyGameServiceTestiness {
 
-  describe ("the first turn") {
+  property ("the first turn prints the welcome message") {
+    val someGame = GameDefinition(Seq(), "Why hello there")
+    Put("/game/yolo", someGame) ~> myRoute ~> check {
+      status should be(Created)
+    }
 
-    it("prints the welcome message") {
-      val someGame = GameDefinition(Seq(), "Why hello there")
-      import spray.json.DefaultJsonProtocol._
-      Put("/game/yolo", someGame) ~> myRoute ~> check {
-        status should be(Created)
-      }
-
-      Get("/game/yolo/begin") ~> myRoute ~> check {
-        responseAs[GameResponse].instructions should contain(Print("Why hello there"))
-      }
+    Get("/game/yolo/begin") ~> myRoute ~> check {
+      responseAs[GameResponse].instructions should contain(Print("Why hello there"))
     }
   }
 }
