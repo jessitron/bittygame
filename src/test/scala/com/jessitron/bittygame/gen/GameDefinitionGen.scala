@@ -22,6 +22,8 @@ trait PlayerActionGen {
   } yield PlayerAction.printing(trigger, message)
 
   val playerActionGen = Gen.frequency((4,printActionGen), (1,victoryActionGen))
+
+  implicit val playerActionArb: Arbitrary[PlayerAction] = Arbitrary(playerActionGen)
 }
 
 trait GameDefinitionGen extends PlayerActionGen {
