@@ -22,4 +22,10 @@ object Turn {
     }
   }
 
+  def think(gameDef: GameDefinition, gameState: GameState): Seq[String] = {
+      gameDef.possibilities.map {
+        _.trigger
+      }
+  }
+
 }

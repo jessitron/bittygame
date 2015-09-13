@@ -5,6 +5,8 @@ import WhatHappens.thisHappens
 case class PlayerAction(trigger: Trigger, results: WhatHappens) {
   def available(gameState: GameState): Boolean = true
   def triggeredBy(str: String) = trigger.equalsIgnoreCase(str)
+
+  def conflictsWith(other: PlayerAction) = other.trigger == trigger
 }
 object PlayerAction {
   def printing(trigger: Trigger, printedResponse: MessageToThePlayer) =

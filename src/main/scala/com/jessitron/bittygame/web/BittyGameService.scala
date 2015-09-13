@@ -75,9 +75,7 @@ trait BittyGameService extends HttpService {
     post {
       entity(as[GameState]) { state =>
         def stuff = gameDefinitions.retrieve(seg).map { gameDef =>
-          gameDef.possibilities.map {
-            _.trigger
-          }
+          Turn.think(gameDef, state)
         }
        handleNotFound("darn it")(stuff)
       }

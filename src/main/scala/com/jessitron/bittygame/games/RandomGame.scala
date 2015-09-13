@@ -66,8 +66,8 @@ class RandomGame(firstPartsOfSentence: Seq[String],
   def funGameGen(numActions: Int) : Gen[GameDefinition] = for {
     welcomeMessage <- funMessage(5)
     actions <- Gen.listOfN(numActions, funAction)
-    winningAction <- victory
-  } yield GameDefinition(actions :+ winningAction, welcomeMessage)
+    winningAction <- victory.suchThat(v => !actions.exists(_.conflictsWith(v)))
+  } yield GameDefinition(scala.util.Random.shuffle(actions :+ winningAction), welcomeMessage)
 
   def create(): GameDefinition = Util.untilYouGetOne(funGameGen(numActions = 5).sample)
 
