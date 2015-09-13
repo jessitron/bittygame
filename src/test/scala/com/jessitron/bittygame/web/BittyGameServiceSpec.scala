@@ -21,7 +21,7 @@ class BittyGameServiceSpec extends org.scalatest.PropSpec
     forAll(possibilitiesGen,
            welcomeMessageGen)
     { (someActions: Seq[PlayerAction],
-              message: MessageToThePlayer) =>
+       message: MessageToThePlayer) =>
       val someGame = GameDefinition(Seq(), message)
       Put("/game/yolo", someGame) ~> myRoute ~> check {
         status should be(Created)

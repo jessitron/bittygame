@@ -63,12 +63,13 @@ class RandomGame(firstPartsOfSentence: Seq[String],
     noun <- Gen.oneOf("door", "book", nouns:_*)
   } yield PlayerAction.victory(s"$verb $noun", "Woot! You win!")
 
-  private def funGameGen(size: Int) : Gen[GameDefinition] = for {
+  def funGameGen(numActions: Int) : Gen[GameDefinition] = for {
     welcomeMessage <- funMessage(5)
-    actions <- Gen.listOfN(size, funAction)
-  } yield GameDefinition(actions, welcomeMessage)
+    actions <- Gen.listOfN(numActions, funAction)
+    winningAction <- victory
+  } yield GameDefinition(actions :+ winningAction, welcomeMessage)
 
-  def create(): GameDefinition = Util.untilYouGetOne(funGameGen(10).sample)
+  def create(): GameDefinition = Util.untilYouGetOne(funGameGen(numActions = 5).sample)
 
 }
 
