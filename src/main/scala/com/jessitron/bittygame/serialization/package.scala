@@ -11,6 +11,7 @@ package object serialization {
       val fields = obj match {
         case ExitGame => Map("type" -> "exit")
         case Print(m) => Map("type" -> "print", "message" -> m)
+        case Win      => Map("type" -> "win")
       }
       fields.toJson
     }
@@ -23,6 +24,7 @@ package object serialization {
       mappy.getOrElse("type", fail("no type", json)) match {
         case "exit"  => ExitGame
         case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)))
+        case "win"   => Win
       }
     }
   }
