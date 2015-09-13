@@ -6,7 +6,7 @@ import com.jessitron.bittygame.games.RandomGame
 import com.jessitron.bittygame.web.messages.{GameTurn, CreateRandomGameResponse, GameResponse}
 import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
 import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
-import spray.http.HttpHeaders.`Access-Control-Allow-Origin`
+import spray.http.HttpHeaders.{`Access-Control-Allow-Headers`, `Access-Control-Allow-Origin`}
 import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing._
 import spray.http._
@@ -32,6 +32,7 @@ class BittyGameServiceActor extends Actor with BittyGameService {
 trait BittyGameService extends HttpService {
 
   private val allowOriginHeader = `Access-Control-Allow-Origin`(AllOrigins)
+  private val allowOrdinaryHeaders = `Access-Control-Allow-Headers`("Content-Type")
 
   implicit val executionContext: ExecutionContext
   val gameDefinitions: GameDefinitionDAO
@@ -50,7 +51,10 @@ trait BittyGameService extends HttpService {
     gameName =>
       post {
         entity(as[GameTurn]) { turn =>
-          complete(StatusCodes.OK)
+          val fo = gameDefinitions.retrieve(gameName) map { gameDef =>
+            Turn.act(gameDef)(turn.state, turn.typed)
+          }
+          handleNotFound("turn poo")(fo)
         }
       }
   }
@@ -60,6 +64,7 @@ trait BittyGameService extends HttpService {
       case Success(yay) => complete(yay)
       case Failure(t: GameDefinitionDAO.NotFoundException) =>
         complete(StatusCodes.NotFound, complaint)
+      case Failure(other) => throw other // avoid compiler warning
     }
 
   private val think: Route = path("game" / Segment / "think") { seg =>
@@ -72,6 +77,10 @@ trait BittyGameService extends HttpService {
         }
        handleNotFound("darn it")(stuff)
       }
+    } ~
+    options {
+      // NO REALLY IT'S OK TO POST
+      respondWithHeaders(allowOrdinaryHeaders) { complete(StatusCodes.OK) }
     }
   }
 
