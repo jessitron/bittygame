@@ -1,14 +1,17 @@
+WHERE="localhost:8080"
+alias heroku=WHERE='https://peaceful-bayou-3271.herokuapp.com'
+
 think() {
  game=$1
- curl -XPOST -H"Content-Type: application/json" localhost:8080/game/$game/think -d '{"inventory":[]}'
+ curl -XPOST -H"Content-Type: application/json" $WHERE/game/$game/think -d '{"inventory":[]}'
 }
 
 begin() {
   game=$1
   echo "begin $game"
-  curl localhost:8080/game/$game/begin
+  curl $WHERE/game/$game/begin
 }
 
 random() {
-  curl localhost:8080/random | jq .created | sed 's/"//g'
+  curl "$WHERE/random" | jq .created | sed 's/"//g'
 }
