@@ -1,6 +1,6 @@
 package com.jessitron.bittygame.web
 
-import com.jessitron.bittygame.web.ports.TrivialGameDefinitionDAO
+import com.jessitron.bittygame.web.ports.{TrivialGameStateDAO, TrivialGameDefinitionDAO}
 import org.scalatest.{Status, Args, Suite}
 import spray.testkit.ScalatestRouteTest
 
@@ -15,4 +15,5 @@ trait BittyGameServiceTestiness
   val executionContext = scala.concurrent.ExecutionContext.global
 
   val gameDefinitions = new TrivialGameDefinitionDAO()
+  val gameStates = new TrivialGameStateDAO()
 }

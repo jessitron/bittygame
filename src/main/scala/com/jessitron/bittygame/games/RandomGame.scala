@@ -3,7 +3,7 @@ package com.jessitron.bittygame.games
 import java.nio.file.{Path, Files}
 
 import com.jessitron.bittygame.crux.{PlayerAction, GameDefinition}
-import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
+import com.jessitron.bittygame.web.identifiers.GameDefinitionKey
 import org.scalacheck.Gen
 
 import scala.io.Source

@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.web
 
+import com.jessitron.bittygame.web.identifiers.GameDefinitionKey
 import com.jessitron.bittygame.web.messages.CreateRandomGameResponse
-import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
 import org.scalatest.{PropSpec, Assertions}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import spray.httpx.SprayJsonSupport._
