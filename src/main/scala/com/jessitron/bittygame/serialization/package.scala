@@ -44,6 +44,7 @@ package object serialization {
       val mappy = json.convertTo[Map[String, String]]
       mappy.getOrElse("type", fail("no type", json)) match {
         case "exit"  => ExitGame
+        case "win"   => Win
         case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)))
         case "unknown" => IDontKnowHowTo(mappy.getOrElse("what", fail("unknown needs what", json)))
         case "denied"  => CantDoThat(mappy.getOrElse("why", fail("denied needs why", json)))
@@ -51,12 +52,12 @@ package object serialization {
     }
   }
 
+  implicit val itemFormat: RootJsonFormat[Item] = jsonFormat1(Item.apply)
   implicit val whatHappensWriter: RootJsonFormat[WhatHappens] = jsonFormat1(WhatHappens.apply)
   implicit val obstacleWriter: JsonFormat[Obstacle] = jsonFormat2(Obstacle.apply)
-  implicit val playerActionFormat: RootJsonFormat[Opportunity] = jsonFormat4(Opportunity.apply)
 
+  implicit val playerActionFormat: RootJsonFormat[Opportunity] = jsonFormat4(Opportunity.apply)
   implicit val scenarioFormat: RootJsonFormat[Scenario] = jsonFormat2(Scenario.apply)
-  implicit val itemFormat: RootJsonFormat[Item] = jsonFormat1(Item.apply)
 
   implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat1(GameState.apply)
 }
