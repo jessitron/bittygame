@@ -5,7 +5,19 @@ import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.util.Pretty
 
-trait OpportunityGen extends ThingThatCanHappenGen with ItemGen {
+trait ActionConditionGen {
+
+  def conditionGen(itemsInGame: Seq[Item]) = for {
+    itemToGetInTheWay <- Gen.oneOf(itemsInGame)
+  } yield Has(itemToGetInTheWay)
+
+  def conditionsGen(itemsInGame: Seq[Item]) = for {
+    howMany <- Gen.choose(0,2)
+    some <- Gen.listOfN(howMany, conditionGen(itemsInGame))
+  } yield some
+}
+
+trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionConditionGen {
 
   val triggerGen: Gen[Trigger] = Gen.alphaStr.suchThat(_.nonEmpty)
 
@@ -22,40 +34,23 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen {
     message <- messageGen
   } yield Opportunity.printing(trigger, message)
 
-  def thisOften(percentage: Int): Gen[Boolean] = Gen.frequency(((100 - percentage), false), (percentage, true))
+  def obstacleGen(itemsInGame: Seq[Item]) = for {
+    sadMessage <- messageGen
+    condition <- conditionGen(itemsInGame)
+  } yield Obstacle(condition, sadMessage)
 
-  def maybeDo(so: Boolean, doThis: Opportunity => Opportunity)(to: Opportunity): Opportunity = {
-    if (so)
-      doThis(to)
-    else
-      to
-  }
+  // question: what happens for an empty list of items?
+  def obstaclesGen(itemsInGame: Seq[Item]) = for {
+    howMany <- Gen.choose(0,2)
+    some <- Gen.listOfN(howMany, obstacleGen(itemsInGame))
+  } yield some
 
   def opportunityGen(itemsInGame: Seq[Item]): Gen[Opportunity] = for {
     trigger <- triggerGen
-    message <- messageGen
-    itemToGet <- Gen.oneOf(itemsInGame)
-    itemToRequire <- Gen.oneOf(itemsInGame)
-    itemToGetInTheWay <- Gen.oneOf(itemsInGame)
-    sadMessage <- messageGen
-    acquireSomething <- Gen.oneOf(true, false)
-    requireSomething <- Gen.oneOf(true, false)
-    win <- thisOften(10)
-    exit <- thisOften(20)
-    obstacle <- thisOften(25)
-  } yield {
-      val opportunity = Opportunity.printing(trigger, message)
-      val doTheseSometimes: Seq[Opportunity => Opportunity] = scala.util.Random.shuffle(
-      List (
-        maybeDo(acquireSomething, _.andProvides(itemToGet)),
-        maybeDo(requireSomething, _.onlyIf(Has(itemToRequire))),
-        maybeDo(win, _.andWin),
-        maybeDo(exit, _.andExit),
-        maybeDo(obstacle, _.behindObstacle(Has(itemToGetInTheWay), sadMessage))
-      ))
-
-      doTheseSometimes.foldLeft(opportunity){case (o, f) => f(o)}
-    }
+    whatHappens <- takenOpportunityGen
+    obstacles <- obstaclesGen(itemsInGame)
+    conditions <- conditionsGen(itemsInGame)
+  } yield  Opportunity(trigger, whatHappens, conditions, obstacles)
 
   val playerActionGen = for {
     randomItems <- Gen.listOf(itemGen)
