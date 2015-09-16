@@ -5,7 +5,7 @@ import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.util.Pretty
 
-trait PlayerActionGen extends ThingThatCanHappenGen {
+trait PlayerActionGen extends ThingThatCanHappenGen with ItemGen {
 
   val triggerGen: Gen[Trigger] = Gen.alphaStr.suchThat(_.nonEmpty)
 
