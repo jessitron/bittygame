@@ -25,14 +25,16 @@ package object serialization {
     }
   }
 
-  implicit val thingThatCanHappenWriter: JsonFormat[ThingThatCanHappen] = new JsonFormat[ThingThatCanHappen] {
+  implicit def thingThatCanHappenWriter(implicit itemFormat: JsonFormat[Item]): JsonFormat[ThingThatCanHappen] = new JsonFormat[ThingThatCanHappen] {
+
     override def write(obj: ThingThatCanHappen): JsValue = {
       val fields = obj match {
-        case ExitGame => Map("type" -> "exit")
-        case Print(m) => Map("type" -> "print", "message" -> m)
-        case Win      => Map("type" -> "win")
-        case IDontKnowHowTo(s) => Map("type" -> "unknown", "what" -> s)
-        case CantDoThat(s) => Map("type" -> "denied", "why" -> s)
+        case ExitGame => Map("type" -> "exit").mapValues(JsString(_))
+        case Print(m) => Map("type" -> "print", "message" -> m).mapValues(JsString(_))
+        case Win      => Map("type" -> "win").mapValues(JsString(_))
+        case Acquire(it)  => Map("type" -> JsString("acquire"), "item" -> itemFormat.write(it))
+        case IDontKnowHowTo(s) => Map("type" -> "unknown", "what" -> s).mapValues(JsString(_))
+        case CantDoThat(s) => Map("type" -> "denied", "why" -> s).mapValues(JsString(_))
       }
       fields.toJson
     }
@@ -41,13 +43,14 @@ package object serialization {
       throw new RuntimeException(s"Could not deserialize ThingThatCanHappen; $why. Received:${json.prettyPrint}")
 
     override def read(json: JsValue): ThingThatCanHappen = {
-      val mappy = json.convertTo[Map[String, String]]
-      mappy.getOrElse("type", fail("no type", json)) match {
+      val mappy = json.asInstanceOf[JsObject].fields
+      mappy.getOrElse("type", fail("no type", json)).asInstanceOf[JsString].value match {
         case "exit"  => ExitGame
         case "win"   => Win
-        case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)))
-        case "unknown" => IDontKnowHowTo(mappy.getOrElse("what", fail("unknown needs what", json)))
-        case "denied"  => CantDoThat(mappy.getOrElse("why", fail("denied needs why", json)))
+        case "acquire" => Acquire(itemFormat.read(mappy.getOrElse("item", fail("acquire needs item", json))))
+        case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)).asInstanceOf[JsString].value)
+        case "unknown" => IDontKnowHowTo(mappy.getOrElse("what", fail("unknown needs what", json)).asInstanceOf[JsString].value)
+        case "denied"  => CantDoThat(mappy.getOrElse("why", fail("denied needs why", json)).asInstanceOf[JsString].value)
       }
     }
   }
