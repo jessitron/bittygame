@@ -22,12 +22,50 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen {
     message <- messageGen
   } yield Opportunity.printing(trigger, message)
 
-  val playerActionGen = Gen.frequency((4,printActionGen), (1,victoryActionGen))
+  def thisOften(percentage: Int): Gen[Boolean] = Gen.frequency(((100 - percentage), false), (percentage, true))
 
-  implicit val arbitratyOpportunity: Arbitrary[Opportunity] = Arbitrary(playerActionGen)
+  def maybeDo(so: Boolean, doThis: Opportunity => Opportunity)(to: Opportunity): Opportunity = {
+    if (so)
+      doThis(to)
+    else
+      to
+  }
+
+  def opportunityGen(itemsInGame: Seq[Item]): Gen[Opportunity] = for {
+    trigger <- triggerGen
+    message <- messageGen
+    itemToGet <- Gen.oneOf(itemsInGame)
+    itemToRequire <- Gen.oneOf(itemsInGame)
+    itemToGetInTheWay <- Gen.oneOf(itemsInGame)
+    sadMessage <- messageGen
+    acquireSomething <- Gen.oneOf(true, false)
+    requireSomething <- Gen.oneOf(true, false)
+    win <- thisOften(10)
+    exit <- thisOften(20)
+    obstacle <- thisOften(25)
+  } yield {
+      val opportunity = Opportunity.printing(trigger, message)
+      val doTheseSometimes: Seq[Opportunity => Opportunity] = scala.util.Random.shuffle(
+      List (
+        maybeDo(acquireSomething, _.andProvides(itemToGet)),
+        maybeDo(requireSomething, _.onlyIf(Has(itemToRequire))),
+        maybeDo(win, _.andWin),
+        maybeDo(exit, _.andExit),
+        maybeDo(obstacle, _.behindObstacle(Has(itemToGetInTheWay), sadMessage))
+      ))
+
+      doTheseSometimes.foldLeft(opportunity){case (o, f) => f(o)}
+    }
+
+  val playerActionGen = for {
+    randomItems <- Gen.listOf(itemGen)
+    opportunity <- opportunityGen(randomItems)
+  } yield opportunity
+
+  implicit val arbitraryOpportunity: Arbitrary[Opportunity] = Arbitrary(playerActionGen)
 
   implicit def prettyOpportunity(pa: Opportunity):Pretty = Pretty { p =>
-    s"Type ${pa.trigger} to " + prettyWhatHappens(pa.results)(p)
+    s"Type ${pa.trigger} to " + prettyWhatHappens(pa.results)(p) + "\n  if " + pa.conditions + "\n  unless " + pa.obstacles
   }
 }
 
