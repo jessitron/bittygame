@@ -25,7 +25,8 @@ object JessLife {
   val computerInternship = Opportunity.printing("take a summer internship",
     "You stay with your aunt and work as a programmer for the summer. Fun!").
     onlyIf(Has(collegeEnrollment)).
-    andProvides(loveOfProgramming) // TODO: only if not has part time job!
+    andProvides(loveOfProgramming)
+   // .withObstacle(Has(partTimeJob), "Oh, no, you would lose your part-time job.")// TODO: only if not has part time job!
 
 
 

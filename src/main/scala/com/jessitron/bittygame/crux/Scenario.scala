@@ -3,6 +3,8 @@ package com.jessitron.bittygame.crux
 import WhatHappens.thisHappens
 
 case class Opportunity(trigger: Trigger, results: WhatHappens, conditions: Seq[ActionCondition]) {
+  def behindObstacle(condition: ActionCondition, disappointment: MessageToThePlayer): Opportunity = this
+
   def available(gameState: GameState): Boolean = conditions.forall(ActionCondition.met(_, gameState))
   def conflictsWith(other: Opportunity) = other.trigger == trigger
 
