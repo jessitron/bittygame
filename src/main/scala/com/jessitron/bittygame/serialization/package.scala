@@ -31,6 +31,8 @@ package object serialization {
         case ExitGame => Map("type" -> "exit")
         case Print(m) => Map("type" -> "print", "message" -> m)
         case Win      => Map("type" -> "win")
+        case IDontKnowHowTo(s) => Map("type" -> "unknown", "what" -> s)
+        case CantDoThat(s) => Map("type" -> "denied", "why" -> s)
       }
       fields.toJson
     }
@@ -43,7 +45,8 @@ package object serialization {
       mappy.getOrElse("type", fail("no type", json)) match {
         case "exit"  => ExitGame
         case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)))
-        case "win"   => Win
+        case "unknown" => IDontKnowHowTo(mappy.getOrElse("what", fail("unknown needs what", json)))
+        case "denied"  => CantDoThat(mappy.getOrElse("why", fail("denied needs why", json)))
       }
     }
   }
