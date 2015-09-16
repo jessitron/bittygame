@@ -1,12 +1,12 @@
 package com.jessitron.bittygame.gen
 
-import com.jessitron.bittygame.crux.{GameState, GameDefinition}
+import com.jessitron.bittygame.crux.{GameState, Scenario}
 import org.scalacheck.util.Pretty
 import org.scalacheck.{Arbitrary, Gen}
 
-trait GameStateGen extends GameDefinitionGen with ItemGen {
+trait GameStateGen extends ScenarioGen with ItemGen {
 
-  def gameStateGen(gameDef: GameDefinition): Gen[GameState] = GameState.init // TODO: use the items in the game
+  def gameStateGen(scenario: Scenario): Gen[GameState] = GameState.init // TODO: use the items in the game
 
   val independentGameStateGen : Gen[GameState] =
     for {
@@ -14,18 +14,18 @@ trait GameStateGen extends GameDefinitionGen with ItemGen {
       items <- Gen.listOfN(itemCount, itemGen)
     } yield GameState(items)
 
-  def gameAndStateGen: Gen[(GameDefinition, GameState)] =
+  def gameAndStateGen: Gen[(Scenario, GameState)] =
     for {
-      gameDef <- gameDefGen
-      gameState <- gameStateGen(gameDef)
-    } yield (gameDef, gameState)
+      scenario <- scenarioGen
+      gameState <- gameStateGen(scenario)
+    } yield (scenario, gameState)
 
-  implicit val arbGameAndState: Arbitrary[(GameDefinition, GameState)] = Arbitrary(gameAndStateGen)
+  implicit val arbGameAndState: Arbitrary[(Scenario, GameState)] = Arbitrary(gameAndStateGen)
 
-  implicit def prettyGameAndState(gameAndState: (GameDefinition, GameState)): Pretty =
+  implicit def prettyGameAndState(gameAndState: (Scenario, GameState)): Pretty =
     Pretty { p =>
-      val (gameDef, gameState) = gameAndState
-      val gameDefPretty = implicitly[GameDefinition => Pretty]
-       s"GameState: $gameState\n" + gameDefPretty(gameDef)(p)
+      val (scenario, gameState) = gameAndState
+      val scenarioPretty = implicitly[Scenario => Pretty]
+       s"GameState: $gameState\n" + scenarioPretty(scenario)(p)
     }
 }

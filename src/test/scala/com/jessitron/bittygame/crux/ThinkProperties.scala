@@ -5,10 +5,10 @@ import com.jessitron.bittygame.gen.gameAndStateGen
 
 object ThinkProperties extends Properties("of thinking") {
 
-  val neverThinkOfBlank: PartialFunction[(GameDefinition, GameState), Prop] =
+  val neverThinkOfBlank: PartialFunction[(Scenario, GameState), Prop] =
   {
-    case (gameDef, gameState) =>
-      !Turn.think(gameDef, gameState).contains("")
+    case (scenario, gameState) =>
+      !Turn.think(scenario, gameState).contains("")
   }
 
   property("Never returns a blank option") =

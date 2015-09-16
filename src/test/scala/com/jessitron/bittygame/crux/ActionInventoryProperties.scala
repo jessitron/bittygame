@@ -6,36 +6,36 @@ import org.scalacheck.Prop.BooleanOperators
 
 object ActionInventoryProperties extends Properties("Actions that provide inventory") {
 
-  property("If I take an action that provides an item, then I have the item") =
+  property("If I take an opportunity that provides an item, then I have the item") =
     Prop.forAll {
-      (gameDefAndState: (GameDefinition, GameState),
-        someAction: PlayerAction,
+      (scenarioAndState: (Scenario, GameState),
+        someAction: Opportunity,
         item: Item) =>
 
-      val (gameDefWithoutAction, gameState) = gameDefAndState
+      val (scenarioWithoutOpportunity, gameState) = scenarioAndState
 
       val actionProvidingItem = someAction.andProvides(item)
-      val gameDef = gameDefWithoutAction.addPossibility(actionProvidingItem)
+      val scenario = scenarioWithoutOpportunity.addPossibility(actionProvidingItem)
 
-      val (nextState, _) = Turn.act(gameDef)(gameState, someAction.trigger)
+      val (nextState, _) = Turn.act(scenario)(gameState, someAction.trigger)
 
       nextState.hasItem(item) :| "Item not in possession."
     }
 
-  property("If an action requires an item, it is not available until we have the item") =
+  property("If an opportunity requires an item, it is not available until we have the item") =
     Prop.forAll {
-      (gameDefAndState: (GameDefinition, GameState),
-       someAction: PlayerAction,
+      (scenarioAndState: (Scenario, GameState),
+       someAction: Opportunity,
        item: Item) =>
 
-        val (gameDefWithoutAction, gameState) = gameDefAndState
+        val (scenarioWithoutOpportunity, gameState) = scenarioAndState
 
         (!gameState.hasItem(item)) ==> {
 
           val actionRequiringItem = someAction.onlyIf(Has(item))
-          val gameDef = gameDefWithoutAction.addPossibility(actionRequiringItem)
+          val scenario = scenarioWithoutOpportunity.addPossibility(actionRequiringItem)
 
-          val (_, happenings) = Turn.act(gameDef)(gameState, someAction.trigger)
+          val (_, happenings) = Turn.act(scenario)(gameState, someAction.trigger)
 
           happenings.results.contains(IDontKnowHowTo(someAction.trigger)) :|
             s"Should not have been able to do that. Result: $happenings\nAction: $actionRequiringItem"

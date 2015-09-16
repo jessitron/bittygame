@@ -1,12 +1,12 @@
 package com.jessitron.bittygame.web
 
 import akka.actor.Actor
-import com.jessitron.bittygame.crux.{GameState, Turn, GameDefinition}
-import com.jessitron.bittygame.games.RandomGame
-import com.jessitron.bittygame.web.messages.{GameTurn, CreateRandomGameResponse, GameResponse}
-import com.jessitron.bittygame.web.identifiers.{GameDefinitionKey, GameID}
+import com.jessitron.bittygame.crux.{GameState, Turn, Scenario}
+import com.jessitron.bittygame.scenarios.RandomScenario
+import com.jessitron.bittygame.web.messages.{CreateRandomScenarioResponse, GameTurn, GameResponse}
+import com.jessitron.bittygame.web.identifiers.ScenarioKey
 import com.jessitron.bittygame.web.ports.GameStateDAO.SaveResult
-import com.jessitron.bittygame.web.ports.{TrivialGameStateDAO, GameStateDAO, TrivialGameDefinitionDAO, GameDefinitionDAO}
+import com.jessitron.bittygame.web.ports.{ScenarioDAO, TrivialGameStateDAO, GameStateDAO, TrivialScenarioDAO}
 import spray.http.HttpHeaders.{`Access-Control-Allow-Headers`, `Access-Control-Allow-Origin`}
 import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing._
@@ -25,10 +25,10 @@ class BittyGameServiceActor extends Actor with BittyGameService {
 
   def receive = runRoute(myRoute)
 
-  val gameDefinitions = new TrivialGameDefinitionDAO() // for realz, I'd put this in an actor
+  val scenarioDAO = new TrivialScenarioDAO() // for realz, I'd put this in an actor
   val gameStates = new TrivialGameStateDAO() // for realz, I'd put this in an actor
 
-  gameDefinitions.save("hungover", com.jessitron.bittygame.games.Hungover.gameDef)
+  scenarioDAO.save("hungover", com.jessitron.bittygame.scenarios.Hungover.scenario)
 }
 
 trait BittyGameService extends HttpService {
@@ -37,14 +37,14 @@ trait BittyGameService extends HttpService {
   private val allowOrdinaryHeaders = `Access-Control-Allow-Headers`("Content-Type")
 
   implicit val executionContext: ExecutionContext
-  val gameDefinitions: GameDefinitionDAO
+  val scenarioDAO: ScenarioDAO
   val gameStates: GameStateDAO
 
   private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
     val gameName = java.net.URLDecoder.decode(seg, "UTF-8")
     get { // refactor into for comprehension?
-      def theFutureIsGreat = gameDefinitions.retrieve(gameName).map { gameDef =>
-        val (gameState, whatHappens) = Turn.firstTurn(gameDef)
+      def theFutureIsGreat = scenarioDAO.retrieve(gameName).map { scenario =>
+        val (gameState, whatHappens) = Turn.firstTurn(scenario)
         gameStates.store(gameState).map { case SaveResult(gameID) =>
           GameResponse(gameID, whatHappens.tellTheClient)
         }
@@ -59,9 +59,9 @@ trait BittyGameService extends HttpService {
         entity(as[GameTurn]) { turn =>
 
           val act = for {
-            gameDef <- gameDefinitions.retrieve(gameName)
+            scenario <- scenarioDAO.retrieve(gameName)
             gameState <- gameStates.recall(turn.gameID)
-            (newState, happenings) = Turn.act(gameDef)(gameState, turn.playerMove)
+            (newState, happenings) = Turn.act(scenario)(gameState, turn.playerMove)
             save <- gameStates.update(turn.gameID, newState)
           } yield GameResponse(save.gameID, happenings.tellTheClient)
 
@@ -77,7 +77,7 @@ trait BittyGameService extends HttpService {
   private def handleNotFound[X](complaint: String)(x: Future[X])(implicit ev1: X => ToResponseMarshallable) =
     onComplete(x) {
       case Success(yay) => complete(yay)
-      case Failure(t: GameDefinitionDAO.NotFoundException) =>
+      case Failure(t: ScenarioDAO.NotFoundException) =>
         complete(StatusCodes.NotFound, complaint)
       case Failure(other) => throw other // avoid compiler warning
     }
@@ -85,8 +85,8 @@ trait BittyGameService extends HttpService {
   private val think: Route = path("game" / Segment / "think") { seg =>
     post {
       entity(as[GameState]) { state =>
-        def stuff = gameDefinitions.retrieve(seg).map { gameDef =>
-          Turn.think(gameDef, state)
+        def stuff = scenarioDAO.retrieve(seg).map { scenario =>
+          Turn.think(scenario, state)
         }
        handleNotFound("darn it")(stuff)
       }
@@ -97,10 +97,10 @@ trait BittyGameService extends HttpService {
     }
   }
 
-  private val createGameDef: Route = path("game" / Segment) { seg =>
-    entity(as[GameDefinition]) { gameDef =>
+  private val createScenario: Route = path("game" / Segment) { seg =>
+    entity(as[Scenario]) { scenario =>
       put {
-        complete(gameDefinitions.save(seg, gameDef).map(_ => StatusCodes.Created))
+        complete(scenarioDAO.save(seg, scenario).map(_ => StatusCodes.Created))
       }
     }
   }
@@ -108,18 +108,18 @@ trait BittyGameService extends HttpService {
   private val createRandomGame: Route = path ("random") {
     (get | put) {
       complete {
-        val newName = RandomGame.name(gameDefinitions.names())
-        gameDefinitions.save(newName, RandomGame.create()).map(
-          _ => CreateRandomGameResponse(newName, firstTurnUrl(newName))
+        val newName = RandomScenario.name(scenarioDAO.names())
+        scenarioDAO.save(newName, RandomScenario.create()).map(
+          _ => CreateRandomScenarioResponse(newName, firstTurnUrl(newName))
         ).map( x => StatusCodes.Created -> x)
       }
     }
   }
 
-  def firstTurnUrl(name: GameDefinitionKey): String = {
+  def firstTurnUrl(name: ScenarioKey): String = {
     s"/game/${java.net.URLEncoder.encode(name, "UTF-8")}/begin"
   }
 
   val myRoute =
-    respondWithHeaders(allowOriginHeader) { firstTurn ~ act ~ createGameDef ~ createRandomGame ~ think }
+    respondWithHeaders(allowOriginHeader) { firstTurn ~ act ~ createScenario ~ createRandomGame ~ think }
 }

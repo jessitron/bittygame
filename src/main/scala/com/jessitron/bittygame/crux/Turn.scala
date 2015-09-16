@@ -4,19 +4,19 @@ import WhatHappens._
 
 object Turn {
 
-  def firstTurn(gameDef: GameDefinition): (GameState, WhatHappens) = {
+  def firstTurn(scenario: Scenario): (GameState, WhatHappens) = {
     val initialState = GameState.init
-    val print = Print(gameDef.welcome)
-    val exit = if (availableOptions(gameDef, initialState).isEmpty) Some(ExitGame) else None
+    val print = Print(scenario.welcome)
+    val exit = if (availableOptions(scenario, initialState).isEmpty) Some(ExitGame) else None
     (initialState, thisHappens(print).andMaybe(exit))
   }
 
-  private def availableOptions(gameDef: GameDefinition, gameState: GameState): Seq[PlayerAction] =
-    gameDef.possibilities.filter(_.available(gameState))
+  private def availableOptions(scenario: Scenario, gameState: GameState): Seq[Opportunity] =
+    scenario.possibilities.filter(_.available(gameState))
 
-  def act(gameDef: GameDefinition)
+  def act(scenario: Scenario)
          (previousState: GameState, playerTyped: String): (GameState, WhatHappens) = {
-    gameDef.possibilities.
+    scenario.possibilities.
       filter(_.available(previousState)).
       find(_.triggeredBy(playerTyped)) match {
       case Some(action) => (modifyState(previousState, action), action.results)
@@ -24,7 +24,7 @@ object Turn {
     }
   }
 
-  private def modifyState(previousState: GameState, action: PlayerAction): GameState =
+  private def modifyState(previousState: GameState, action: Opportunity): GameState =
     action.results.results.foldLeft(previousState)(modifyStatePerHappening)
 
   private def modifyStatePerHappening(previousState: GameState, happening: ThingThatCanHappen) =
@@ -33,8 +33,8 @@ object Turn {
       case _ => previousState
     }
 
-  def think(gameDef: GameDefinition, gameState: GameState): Seq[String] = {
-      gameDef.possibilities.map {
+  def think(scenario: Scenario, gameState: GameState): Seq[String] = {
+      scenario.possibilities.map {
         _.trigger
       }
   }

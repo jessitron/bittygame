@@ -1,16 +1,16 @@
-package com.jessitron.bittygame.games
+package com.jessitron.bittygame.scenarios
 
 import java.nio.file.{Path, Files}
 
-import com.jessitron.bittygame.crux.{PlayerAction, GameDefinition}
-import com.jessitron.bittygame.web.identifiers.GameDefinitionKey
+import com.jessitron.bittygame.crux.{Opportunity, Scenario}
+import com.jessitron.bittygame.web.identifiers.ScenarioKey
 import org.scalacheck.Gen
 
 import scala.io.Source
 
-object RandomGame {
+object RandomScenario {
   import Util._
-  lazy val defaultGameGen = new RandomGame(
+  lazy val defaultGameGen = new RandomScenario(
     readResource("/firstPartOfSentence.txt"),
     readResource("/secondPartOfSentence.txt"),
     readResource("/nouns.txt"),
@@ -30,14 +30,14 @@ class RandomName(names: Seq[String]) {
     stupidNumber <- Gen.choose(1, 10000)
   } yield s"$happyName$stupidNumber"
 
-  def name(excluding: Seq[String]): GameDefinitionKey = try {
+  def name(excluding: Seq[String]): ScenarioKey = try {
     Util.untilYouGetOne(nameGen.suchThat(!excluding.contains(_)).sample)
   } catch {
     case t : RuntimeException => throw new RuntimeException (s"excluded: $excluding", t)
   }
 }
 
-class RandomGame(firstPartsOfSentence: Seq[String],
+class RandomScenario(firstPartsOfSentence: Seq[String],
                  secondPartsOfSentence: Seq[String],
                  nouns: Seq[String],
                  verbs: Seq[String]) {
@@ -52,24 +52,24 @@ class RandomGame(firstPartsOfSentence: Seq[String],
     sentences <- Gen.listOfN(numberOfSentences, funSentence)
   } yield sentences.mkString(". ")
 
-  private def funAction: Gen[PlayerAction] = for {
+  private def funAction: Gen[Opportunity] = for {
     verb <- Gen.oneOf("take", "open", verbs:_*)
     noun <- Gen.oneOf("door", "book", nouns:_*)
     message <- funMessage(3)
-  } yield PlayerAction.printing(s"$verb $noun", message)
+  } yield Opportunity.printing(s"$verb $noun", message)
 
-  private def victory: Gen[PlayerAction] = for {
+  private def victory: Gen[Opportunity] = for {
     verb <- Gen.oneOf("take", "open", verbs:_*)
     noun <- Gen.oneOf("door", "book", nouns:_*)
-  } yield PlayerAction.victory(s"$verb $noun", "Woot! You win!")
+  } yield Opportunity.victory(s"$verb $noun", "Woot! You win!")
 
-  def funGameGen(numActions: Int) : Gen[GameDefinition] = for {
+  def funGameGen(numActions: Int) : Gen[Scenario] = for {
     welcomeMessage <- funMessage(5)
     actions <- Gen.listOfN(numActions, funAction)
     winningAction <- victory.suchThat(v => !actions.exists(_.conflictsWith(v)))
-  } yield GameDefinition(scala.util.Random.shuffle(actions :+ winningAction), welcomeMessage)
+  } yield Scenario(scala.util.Random.shuffle(actions :+ winningAction), welcomeMessage)
 
-  def create(): GameDefinition = Util.untilYouGetOne(funGameGen(numActions = 5).sample)
+  def create(): Scenario = Util.untilYouGetOne(funGameGen(numActions = 5).sample)
 
 }
 

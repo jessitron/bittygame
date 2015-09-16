@@ -2,7 +2,7 @@ package com.jessitron.bittygame.web.messages
 
 import spray.json.DefaultJsonProtocol._
 
-case class CreateRandomGameResponse(created: String, first_turn_url: String)
-object CreateRandomGameResponse {
+case class CreateRandomScenarioResponse(created: String, first_turn_url: String)
+object CreateRandomScenarioResponse {
   implicit val format = jsonFormat2(apply)
 }

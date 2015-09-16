@@ -1,6 +1,6 @@
-package com.jessitron.bittygame.games
+package com.jessitron.bittygame.scenarios
 
-import com.jessitron.bittygame.crux.{PlayerAction, GameDefinition}
+import com.jessitron.bittygame.crux.{Opportunity, Scenario}
 
 object Hungover {
 
@@ -29,7 +29,7 @@ object Hungover {
       |  already 1 p.m. so it\'s probably time to drag your sorry ass out of bed and get on with your day.
     """.stripMargin
 
-  val lookAroundBedroom = PlayerAction.printing("look around",
+  val lookAroundBedroom = Opportunity.printing("look around",
     """
       |"You’re in your bedroom, sprawled on top of your comforter and pillows.
       | There’s a poster up on the wall of the Star Trek captains and Picard
@@ -41,8 +41,8 @@ object Hungover {
       | The door leading out of the bedroom is to your left."
     """.stripMargin)
 
-  val magicWin = PlayerAction.victory("strangeloop", "You said the magic word!")
+  val magicWin = Opportunity.victory("strangeloop", "You said the magic word!")
 
-  val gameDef: GameDefinition = GameDefinition(Seq(lookAroundBedroom, magicWin), welcome)
+  val scenario: Scenario = Scenario(Seq(lookAroundBedroom, magicWin), welcome)
 
 }

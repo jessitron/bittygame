@@ -2,24 +2,24 @@ package com.jessitron.bittygame.crux
 
 import WhatHappens.thisHappens
 
-case class PlayerAction(trigger: Trigger, results: WhatHappens, conditions: Seq[ActionCondition]) {
+case class Opportunity(trigger: Trigger, results: WhatHappens, conditions: Seq[ActionCondition]) {
   def available(gameState: GameState): Boolean = conditions.forall(ActionCondition.met(_, gameState))
-  def conflictsWith(other: PlayerAction) = other.trigger == trigger
+  def conflictsWith(other: Opportunity) = other.trigger == trigger
 
   def triggeredBy(str: String) = trigger.equalsIgnoreCase(str)
   def andProvides(item: Item) = copy(results = results.and(Acquire(item)))
   def onlyIf(condition: ActionCondition) = copy(conditions = conditions :+ condition)
 }
-object PlayerAction {
+object Opportunity {
   def printing(trigger: Trigger, printedResponse: MessageToThePlayer) =
-    PlayerAction(trigger, thisHappens(Print(printedResponse)), Seq())
+    Opportunity(trigger, thisHappens(Print(printedResponse)), Seq())
   def victory(trigger: Trigger, printed: MessageToThePlayer) =
-    PlayerAction(trigger, thisHappens(Print(printed)).and(Win).and(ExitGame), Seq())
+    Opportunity(trigger, thisHappens(Print(printed)).and(Win).and(ExitGame), Seq())
 }
 
-case class GameDefinition(possibilities: Seq[PlayerAction],
+case class Scenario(possibilities: Seq[Opportunity],
                           welcome: MessageToThePlayer) {
-  def addPossibility(a: PlayerAction) = copy(possibilities = possibilities :+ a)
+  def addPossibility(a: Opportunity) = copy(possibilities = possibilities :+ a)
 }
 
 

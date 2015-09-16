@@ -8,7 +8,7 @@ class PlayerActionProperties extends Properties("The PlayerAction class") {
 
   property("If it requires an object, it is not available until that object is in state") =
     Prop.forAll(playerActionGen, itemGen, independentGameStateGen) {
-      (playerAction: PlayerAction,
+      (playerAction: Opportunity,
        item: Item,
        gameState: GameState) =>
 
