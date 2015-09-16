@@ -4,8 +4,9 @@ import akka.actor.Actor
 import com.jessitron.bittygame.crux.{GameState, Turn, GameDefinition}
 import com.jessitron.bittygame.games.RandomGame
 import com.jessitron.bittygame.web.messages.{GameTurn, CreateRandomGameResponse, GameResponse}
-import com.jessitron.bittygame.web.ports.GameDefinitionDAO.GameDefinitionKey
-import com.jessitron.bittygame.web.ports.{TrivialGameDefinitionDAO, GameDefinitionDAO}
+import com.jessitron.bittygame.web.identifiers.{GameDefinitionKey, GameID}
+import com.jessitron.bittygame.web.ports.GameStateDAO.SaveResult
+import com.jessitron.bittygame.web.ports.{TrivialGameStateDAO, GameStateDAO, TrivialGameDefinitionDAO, GameDefinitionDAO}
 import spray.http.HttpHeaders.{`Access-Control-Allow-Headers`, `Access-Control-Allow-Origin`}
 import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing._
@@ -25,6 +26,7 @@ class BittyGameServiceActor extends Actor with BittyGameService {
   def receive = runRoute(myRoute)
 
   val gameDefinitions = new TrivialGameDefinitionDAO() // for realz, I'd put this in an actor
+  val gameStates = new TrivialGameStateDAO() // for realz, I'd put this in an actor
 
   gameDefinitions.save("hungover", com.jessitron.bittygame.games.Hungover.gameDef)
 }
@@ -36,12 +38,16 @@ trait BittyGameService extends HttpService {
 
   implicit val executionContext: ExecutionContext
   val gameDefinitions: GameDefinitionDAO
+  val gameStates: GameStateDAO
 
   private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
     val gameName = java.net.URLDecoder.decode(seg, "UTF-8")
-    get {
+    get { // refactor into for comprehension?
       def theFutureIsGreat = gameDefinitions.retrieve(gameName).map { gameDef =>
-        GameResponse(Turn.firstTurn(gameDef))
+        val (gameState, whatHappens) = Turn.firstTurn(gameDef)
+        gameStates.store(gameState).map { case SaveResult(gameID) =>
+          GameResponse(gameID, whatHappens.tellTheClient)
+        }
       }
       handleNotFound("boo hoo")(theFutureIsGreat)
     }
@@ -51,10 +57,15 @@ trait BittyGameService extends HttpService {
     gameName =>
       post {
         entity(as[GameTurn]) { turn =>
-          val fo = gameDefinitions.retrieve(gameName) map { gameDef =>
-            Turn.act(gameDef)(turn.state, turn.playerMove)
-          } map GameResponse.apply
-          handleNotFound("turn poo")(fo)
+
+          val act = for {
+            gameDef <- gameDefinitions.retrieve(gameName)
+            gameState <- gameStates.recall(turn.gameID)
+            (newState, happenings) = Turn.act(gameDef)(gameState, turn.playerMove)
+            save <- gameStates.update(turn.gameID, newState)
+          } yield GameResponse(save.gameID, happenings.tellTheClient)
+
+          handleNotFound("turn poo")(act)
         }
       } ~
       options {
@@ -63,7 +74,7 @@ trait BittyGameService extends HttpService {
       }
   }
 
-  private def handleNotFound[X <% ToResponseMarshallable](complaint: String)(x: Future[X]) =
+  private def handleNotFound[X](complaint: String)(x: Future[X])(implicit ev1: X => ToResponseMarshallable) =
     onComplete(x) {
       case Success(yay) => complete(yay)
       case Failure(t: GameDefinitionDAO.NotFoundException) =>

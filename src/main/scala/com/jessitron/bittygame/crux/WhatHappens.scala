@@ -18,6 +18,8 @@ case class WhatHappens(results: Seq[ThingThatCanHappen]) {
     }
 
   def and(nextThing: ThingThatCanHappen) = this.copy(results = results :+ nextThing)
+
+  def tellTheClient: Seq[ThingThatCanHappen] = results
 }
 
 object WhatHappens {

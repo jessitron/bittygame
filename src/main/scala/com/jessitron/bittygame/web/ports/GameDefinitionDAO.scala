@@ -1,5 +1,6 @@
 package com.jessitron.bittygame.web.ports
 
+import com.jessitron.bittygame.web.identifiers.GameDefinitionKey
 import com.jessitron.bittygame.web.ports.GameDefinitionDAO._
 
 import scala.collection.immutable.HashMap
@@ -15,7 +16,6 @@ trait GameDefinitionDAO {
 }
 
 object GameDefinitionDAO {
-  type GameDefinitionKey = String
   type SaveResult = Unit
   class NotFoundException(msg: String) extends Exception(msg)
 }
