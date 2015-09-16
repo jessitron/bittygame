@@ -4,6 +4,7 @@ import com.jessitron.bittygame.crux._
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.util.Pretty
+import Math.min
 
 trait ActionConditionGen {
 
@@ -12,7 +13,7 @@ trait ActionConditionGen {
   } yield Has(itemToGetInTheWay)
 
   def conditionsGen(itemsInGame: Seq[Item]) = for {
-    howMany <- Gen.choose(0,2)
+    howMany <- Gen.choose(0,min(2, itemsInGame.length))
     some <- Gen.listOfN(howMany, conditionGen(itemsInGame))
   } yield some
 }
@@ -41,7 +42,7 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
 
   // question: what happens for an empty list of items?
   def obstaclesGen(itemsInGame: Seq[Item]) = for {
-    howMany <- Gen.choose(0,2)
+    howMany <- Gen.choose(0,min(2, itemsInGame.length))
     some <- Gen.listOfN(howMany, obstacleGen(itemsInGame))
   } yield some
 
