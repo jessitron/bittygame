@@ -4,7 +4,7 @@ import com.jessitron.bittygame.gen._
 import org.scalacheck.Prop
 import org.scalacheck.Prop.BooleanOperators
 
-object TurnProperties extends org.scalacheck.Properties("Taking a turn") {
+object TurnProperties extends org.scalacheck.Properties("Taking a turn") with GameStateGen {
 
   property("Victory actions result in exit") =
     Prop.forAll(scenarioAndStateGen, triggerGen, messageGen ) { (gameAndState, trigger, message) =>

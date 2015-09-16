@@ -1,19 +1,20 @@
 package com.jessitron.bittygame.web
 
+import com.jessitron.bittygame.gen.GameNameGen
 import com.jessitron.bittygame.web.identifiers.ScenarioKey
 import com.jessitron.bittygame.web.messages.CreateRandomScenarioResponse
 import org.scalatest.{PropSpec, Assertions}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
-import com.jessitron.bittygame.gen._
 import spray.http.StatusCodes
 
 class FirstTurnProperties
   extends PropSpec
   with GeneratorDrivenPropertyChecks
   with BittyGameServiceTestiness
-  with Assertions {
+  with Assertions
+  with GameNameGen {
 
   property("unknown game returns 404") {
     forAll(gameNameGen) { nonexistentGame: ScenarioKey =>

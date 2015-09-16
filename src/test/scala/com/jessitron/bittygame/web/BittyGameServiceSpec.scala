@@ -8,7 +8,7 @@ import spray.http._
 import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
 import StatusCodes._
-import com.jessitron.bittygame.gen._
+import com.jessitron.bittygame.gen.AllGenerators._
 
 class BittyGameServiceSpec extends org.scalatest.PropSpec
                        with GeneratorDrivenPropertyChecks

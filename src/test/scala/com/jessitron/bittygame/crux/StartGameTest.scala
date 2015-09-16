@@ -4,7 +4,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Assertions, PropSpec}
 import com.jessitron.bittygame.gen._
 
-class StartGameTest extends PropSpec with GeneratorDrivenPropertyChecks with Assertions {
+class StartGameTest extends PropSpec with GeneratorDrivenPropertyChecks with Assertions with GameStateGen {
 
    property("The game starts with an empty inventory") {
      forAll { (scenario: Scenario) =>

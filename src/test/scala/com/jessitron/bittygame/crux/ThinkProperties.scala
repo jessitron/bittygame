@@ -1,9 +1,9 @@
 package com.jessitron.bittygame.crux
 
+import com.jessitron.bittygame.gen.GameStateGen
 import org.scalacheck.{Prop, Properties}
-import com.jessitron.bittygame.gen.scenarioAndStateGen
 
-object ThinkProperties extends Properties("of thinking") {
+object ThinkProperties extends Properties("of thinking") with GameStateGen {
 
   val neverThinkOfBlank: PartialFunction[(Scenario, GameState), Prop] =
   {

@@ -18,11 +18,11 @@ trait ActionConditionGen {
   } yield some
 }
 
-trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionConditionGen {
+trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionConditionGen with NonEmptyStringGen {
 
-  val triggerGen: Gen[Trigger] = Gen.alphaStr.suchThat(_.nonEmpty)
+  val triggerGen: Gen[Trigger] = nonEmptyString
 
-  val messageGen: Gen[MessageToThePlayer] = Gen.alphaStr.suchThat(_.nonEmpty)
+  val messageGen: Gen[MessageToThePlayer] = nonEmptyString
 
   val victoryActionGen: Gen[Opportunity] =
   for {
@@ -46,6 +46,11 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
     some <- Gen.listOfN(howMany, obstacleGen(itemsInGame))
   } yield some
 
+  val alwaysAvailableOpportunity : Gen[Opportunity] = for {
+    trigger <- triggerGen
+    whatHappens <- takenOpportunityGen
+  } yield  Opportunity(trigger, whatHappens, Seq(), Seq())
+
   def opportunityGen(itemsInGame: Seq[Item]): Gen[Opportunity] = for {
     trigger <- triggerGen
     whatHappens <- takenOpportunityGen
@@ -54,7 +59,7 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
   } yield  Opportunity(trigger, whatHappens, conditions, obstacles)
 
   val playerActionGen = for {
-    randomItems <- Gen.listOf(itemGen)
+    randomItems <- someItems
     opportunity <- opportunityGen(randomItems)
   } yield opportunity
 
@@ -67,9 +72,9 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
 
 trait ScenarioGen extends OpportunityGen {
 
-  val possibilitiesGen: Gen[Seq[Opportunity]] = Gen.listOf(playerActionGen)
+  val possibilitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(playerActionGen))
 
-  val welcomeMessageGen: Gen[MessageToThePlayer] = Gen.alphaStr.suchThat(_.nonEmpty)
+  val welcomeMessageGen: Gen[MessageToThePlayer] = nonEmptyString
 
   val scenarioGen = for {
     possibilities <- possibilitiesGen
