@@ -17,10 +17,19 @@ object Turn {
   def act(gameDef: GameDefinition)
          (previousState: GameState, playerTyped: String): (GameState, WhatHappens) = {
     gameDef.possibilities.find(_.triggeredBy(playerTyped)) match {
-      case Some(action) => (previousState, action.results)
+      case Some(action) => (modifyState(previousState, action), action.results)
       case None => (previousState, NothingHappens)
     }
   }
+
+  private def modifyState(previousState: GameState, action: PlayerAction): GameState =
+    action.results.results.foldLeft(previousState)(modifyStatePerHappening)
+
+  private def modifyStatePerHappening(previousState: GameState, happening: ThingThatCanHappen) =
+    happening match {
+      case Acquire(item) => previousState.addToInventory(item)
+      case _ => previousState
+    }
 
   def think(gameDef: GameDefinition, gameState: GameState): Seq[String] = {
       gameDef.possibilities.map {
