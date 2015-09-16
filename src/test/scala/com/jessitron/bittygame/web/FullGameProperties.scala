@@ -55,7 +55,9 @@ class FullGameProperties
         responseAs[GameResponse].gameID
       }
 
-      // TODO: complete
+
+      // Next: change "think" to take a gameID and look up the state
+      // (or don't yet, and see the property fail? it could happen.)
 
       true
 
