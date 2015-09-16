@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.gen
 
 import com.jessitron.bittygame.crux.{GameState, GameDefinition}
-import org.scalacheck.Gen
+import org.scalacheck.{Arbitrary, Gen}
 
 trait GameStateGen extends GameDefinitionGen{
 
@@ -13,5 +13,6 @@ trait GameStateGen extends GameDefinitionGen{
       gameState <- gameStateGen(gameDef)
     } yield (gameDef, gameState)
 
+  implicit val arbGameAndState: Arbitrary[(GameDefinition, GameState)] = Arbitrary(gameAndStateGen)
 
 }
