@@ -5,7 +5,7 @@ import org.scalacheck.util.Pretty
 import org.scalacheck.{Gen, Arbitrary}
 import scala.util.Random.shuffle
 
-trait ThingThatCanHappenGen {
+trait ThingThatCanHappenGen extends ItemGen {
 
   val printGen =
     for {
@@ -26,12 +26,15 @@ trait ThingThatCanHappenGen {
   implicit val arbThing: Arbitrary[ThingThatCanHappen] = Arbitrary(thingGen)
 
   val whatHappensGen = for {
-    howMany <- Gen.choose(1,3)
+    howMany <- Gen.choose(1,6)
     one <- printGen
     two <- winGen
     three <- exitGen
+    howManyItems <- Gen.choose(1, howMany)
+    itemsToAcquire <- Gen.listOfN(howManyItems, itemGen)
   } yield {
-      val stuff = shuffle(Seq(one,two,three)).take(howMany)
+      val items = itemsToAcquire.map(Acquire.apply)
+      val stuff = shuffle(Seq(one,two,three) ++ items).take(howMany)
       WhatHappens(stuff)
     }
 
@@ -42,6 +45,7 @@ trait ThingThatCanHappenGen {
       case Print(str) => s"print '$str'"
       case ExitGame => "Exit!"
       case Win => "WIN!!"
+      case Acquire(item) => s"Get $item"
     }.mkString("\n      and ")
   }
 

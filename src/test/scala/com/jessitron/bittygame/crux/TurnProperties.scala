@@ -4,7 +4,7 @@ import com.jessitron.bittygame.gen._
 import org.scalacheck.Prop
 import org.scalacheck.Prop.BooleanOperators
 
-object TurnTest extends org.scalacheck.Properties("Taking a turn") {
+object TurnProperties extends org.scalacheck.Properties("Taking a turn") {
 
   property("Victory actions result in exit") =
     Prop.forAll(gameAndStateGen, triggerGen, messageGen ) { (gameAndState, trigger, message) =>
@@ -16,5 +16,9 @@ object TurnTest extends org.scalacheck.Properties("Taking a turn") {
 
       happenings.results.contains(ExitGame) :| s"the results were ${happenings.results}"
     }
+
+  // TODO: all turns result either in IDontKnowHowTo OR any number of other things
+
+  // TODO: if IDontKnowHowTo, then state is unchanged
 
 }

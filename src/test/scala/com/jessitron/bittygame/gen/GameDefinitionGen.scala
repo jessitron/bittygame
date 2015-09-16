@@ -5,7 +5,7 @@ import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.util.Pretty
 
-trait PlayerActionGen extends ThingThatCanHappenGen {
+trait PlayerActionGen extends ThingThatCanHappenGen with ItemGen {
 
   val triggerGen: Gen[Trigger] = Gen.alphaStr.suchThat(_.nonEmpty)
 
@@ -45,7 +45,7 @@ trait GameDefinitionGen extends PlayerActionGen {
   implicit val arbitraryGameDef: Arbitrary[GameDefinition] = Arbitrary(gameDefGen)
 
   implicit def prettyGameDef(g: GameDefinition): Pretty = Pretty { p =>
-    s"GameDefinition: \n${g.welcome}\n" +
+    s"GameDefinition: \n  Welcome: ${g.welcome}\n" +
       g.possibilities.map(prettyPlayerAction(_)(p)).map("  " + _).mkString("\n")
   }
 
