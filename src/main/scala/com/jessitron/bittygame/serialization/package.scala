@@ -30,7 +30,7 @@ package object serialization {
   }
 
   implicit val whatHappensWriter: RootJsonFormat[WhatHappens] = jsonFormat1(WhatHappens.apply)
-  implicit val playerActionFormat: RootJsonFormat[PlayerAction] = jsonFormat3(PlayerAction.apply)
+  implicit val playerActionFormat: RootJsonFormat[PlayerAction] = jsonFormat2(PlayerAction.apply)
 
   implicit val gameDefinitionFormat: RootJsonFormat[GameDefinition] = jsonFormat2(GameDefinition.apply)
   implicit val itemFormat: RootJsonFormat[Item] = jsonFormat1(Item.apply)

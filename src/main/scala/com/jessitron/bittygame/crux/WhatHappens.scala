@@ -7,6 +7,7 @@ case class Print(message: MessageToThePlayer) extends ThingThatCanHappen {
 }
 case object ExitGame extends ThingThatCanHappen
 case object Win extends ThingThatCanHappen
+case class Acquire(item: Item) extends ThingThatCanHappen
 
 case class WhatHappens(results: Seq[ThingThatCanHappen]) {
   def andMaybe(mightHappen: Option[ThingThatCanHappen]): WhatHappens =
