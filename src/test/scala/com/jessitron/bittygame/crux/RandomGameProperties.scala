@@ -5,7 +5,7 @@ import org.scalacheck.{Gen, Properties, Prop}
 import org.scalacheck.Prop._
 import com.jessitron.bittygame.gen._
 
-object RandomGameSpec extends Properties("Valid games") {
+object RandomGameProperties extends Properties("Valid games") {
 
   val randomGameGen = for {
     optionCount <- Gen.choose(0,10)
