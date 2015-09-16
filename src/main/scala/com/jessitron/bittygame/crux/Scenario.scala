@@ -2,19 +2,33 @@ package com.jessitron.bittygame.crux
 
 import WhatHappens.thisHappens
 
-case class Opportunity(trigger: Trigger, results: WhatHappens, conditions: Seq[ActionCondition]) {
+case class Obstacle(condition: ActionCondition, sadness: MessageToThePlayer) {
+  def applies(gameState: GameState) = ActionCondition.met(condition, gameState)
+  def results = thisHappens(CantDoThat(sadness))
+}
+
+case class Opportunity(trigger: Trigger, results: WhatHappens, conditions: Seq[ActionCondition], obstacles: Seq[Obstacle]) {
+  def take(previousState: GameState): WhatHappens =
+    obstacles.find(_.applies(previousState)).
+      map(obstacle => obstacle.results).
+      getOrElse(results)
+
   def available(gameState: GameState): Boolean = conditions.forall(ActionCondition.met(_, gameState))
+
   def conflictsWith(other: Opportunity) = other.trigger == trigger
 
+  def behindObstacle(condition: ActionCondition, disappointment: MessageToThePlayer): Opportunity = copy(obstacles = obstacles :+ Obstacle(condition, disappointment))
   def triggeredBy(str: String) = trigger.equalsIgnoreCase(str)
   def andProvides(item: Item) = copy(results = results.and(Acquire(item)))
+  def andWin = copy(results = results.and(Win))
+  def andExit = copy(results = results.and(ExitGame))
   def onlyIf(condition: ActionCondition) = copy(conditions = conditions :+ condition)
 }
 object Opportunity {
   def printing(trigger: Trigger, printedResponse: MessageToThePlayer) =
-    Opportunity(trigger, thisHappens(Print(printedResponse)), Seq())
+    Opportunity(trigger, thisHappens(Print(printedResponse)), Seq(), Seq())
   def victory(trigger: Trigger, printed: MessageToThePlayer) =
-    Opportunity(trigger, thisHappens(Print(printed)).and(Win).and(ExitGame), Seq())
+    this.printing(trigger, printed).andWin.andExit
 }
 
 case class Scenario(possibilities: Seq[Opportunity],

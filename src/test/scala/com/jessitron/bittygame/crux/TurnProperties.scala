@@ -7,7 +7,7 @@ import org.scalacheck.Prop.BooleanOperators
 object TurnProperties extends org.scalacheck.Properties("Taking a turn") {
 
   property("Victory actions result in exit") =
-    Prop.forAll(gameAndStateGen, triggerGen, messageGen ) { (gameAndState, trigger, message) =>
+    Prop.forAll(scenarioAndStateGen, triggerGen, messageGen ) { (gameAndState, trigger, message) =>
       val (someScenario, gameState) = gameAndState
 
       val scenario = someScenario.addPossibility(Opportunity.victory(trigger, message))

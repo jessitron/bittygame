@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.serialization
 
-import com.jessitron.bittygame.crux.ThingThatCanHappen
-import org.scalatest.{Assertions, PropSpec}
+import com.jessitron.bittygame.crux.{Acquire, Item, ThingThatCanHappen}
+import org.scalatest.{FunSpec, Assertions, PropSpec}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 import spray.json._
@@ -12,19 +12,37 @@ import com.jessitron.bittygame.gen.ThingThatCanHappenGen._
 class ThingsThatCanHappenSerializationSpec
   extends PropSpec with GeneratorDrivenPropertyChecks with Assertions {
 
-  property("There is always a type field") {
-    forAll { (thing: ThingThatCanHappen) =>
-      val serialized: JsValue = thing.toJson
-      val deserializedAsMap = serialized.convertTo[Map[String,String]]
-
-      assert(deserializedAsMap.contains("type"))
+  property("Round trip") {
+    forAll { thing: ThingThatCanHappen =>
+      val serialized: String = thing.toJson.compactPrint
+      assert(thing === serialized.parseJson.convertTo[ThingThatCanHappen], s"Not successfully parsed: $serialized")
     }
   }
 
-  // consider: making generic "round trip" property that prints the JSON on failure
-  property("Round trip") {
-    forAll { thing: ThingThatCanHappen =>
-      assert(thing === thing.toJson.convertTo[ThingThatCanHappen])
+}
+
+class ThingsThatCanHappenSerializationExamples extends FunSpec {
+
+  describe("the serialization") {
+
+    it("can serialize the item") {
+
+      val thing = Item("poo")
+
+      val serialized: JsValue = thing.toJson
+      val deserialized = serialized.convertTo[Item]
+
+      assert(deserialized == thing)
+    }
+
+    it ("can handle acquire" ) {
+      val thing: ThingThatCanHappen = Acquire(Item("poo"))
+
+      val serialized: JsValue = thing.toJson
+      val deserialized = serialized.convertTo[Map[String,JsValue]]
+
+      assert(deserialized.contains("type"))
+
     }
   }
 

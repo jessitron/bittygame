@@ -19,7 +19,8 @@ object Turn {
     scenario.possibilities.
       filter(_.available(previousState)).
       find(_.triggeredBy(playerTyped)) match {
-      case Some(action) => (modifyState(previousState, action), action.results)
+      case Some(action) =>
+        (modifyState(previousState, action), action.take(previousState))
       case None => (previousState, thisHappens(IDontKnowHowTo(playerTyped)))
     }
   }
