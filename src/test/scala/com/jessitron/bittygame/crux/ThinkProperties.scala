@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.crux
 
 import org.scalacheck.{Prop, Properties}
-import com.jessitron.bittygame.gen.gameAndStateGen
+import com.jessitron.bittygame.gen.scenarioAndStateGen
 
 object ThinkProperties extends Properties("of thinking") {
 
@@ -12,5 +12,5 @@ object ThinkProperties extends Properties("of thinking") {
   }
 
   property("Never returns a blank option") =
-    Prop.forAll(gameAndStateGen)(neverThinkOfBlank)
+    Prop.forAll(scenarioAndStateGen)(neverThinkOfBlank)
 }

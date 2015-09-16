@@ -14,13 +14,13 @@ trait GameStateGen extends ScenarioGen with ItemGen {
       items <- Gen.listOfN(itemCount, itemGen)
     } yield GameState(items)
 
-  def gameAndStateGen: Gen[(Scenario, GameState)] =
+  def scenarioAndStateGen: Gen[(Scenario, GameState)] =
     for {
       scenario <- scenarioGen
       gameState <- gameStateGen(scenario)
     } yield (scenario, gameState)
 
-  implicit val arbGameAndState: Arbitrary[(Scenario, GameState)] = Arbitrary(gameAndStateGen)
+  implicit val arbScenarioAndState: Arbitrary[(Scenario, GameState)] = Arbitrary(scenarioAndStateGen)
 
   implicit def prettyGameAndState(gameAndState: (Scenario, GameState)): Pretty =
     Pretty { p =>

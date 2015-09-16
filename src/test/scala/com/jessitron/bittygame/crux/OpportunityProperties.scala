@@ -4,7 +4,7 @@ import org.scalacheck.{Prop, Properties}
 import com.jessitron.bittygame.gen._
 import Prop.BooleanOperators
 
-class PlayerActionProperties extends Properties("The PlayerAction class") {
+class OpportunityProperties extends Properties("The PlayerAction class") {
 
   property("If it requires an object, it is not available until that object is in state") =
     Prop.forAll(playerActionGen, itemGen, independentGameStateGen) {
