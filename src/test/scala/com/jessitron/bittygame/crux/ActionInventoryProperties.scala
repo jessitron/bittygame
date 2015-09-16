@@ -30,12 +30,16 @@ object ActionInventoryProperties extends Properties("Actions that provide invent
 
         val (gameDefWithoutAction, gameState) = gameDefAndState
 
-        val actionRequiringItem = someAction.onlyIf(Has(item))
-        val gameDef = gameDefWithoutAction.addPossibility(actionRequiringItem)
+        (!gameState.hasItem(item)) ==> {
 
-        val (_, happenings) = Turn.act(gameDef)(gameState, someAction.trigger)
+          val actionRequiringItem = someAction.onlyIf(Has(item))
+          val gameDef = gameDefWithoutAction.addPossibility(actionRequiringItem)
 
-        happenings.results.contains(IDontKnowHowTo(someAction.trigger)) :| "Should not have been able to do that."
+          val (_, happenings) = Turn.act(gameDef)(gameState, someAction.trigger)
+
+          happenings.results.contains(IDontKnowHowTo(someAction.trigger)) :|
+            s"Should not have been able to do that. Result: $happenings\nAction: $actionRequiringItem"
+        }
     }
 
 

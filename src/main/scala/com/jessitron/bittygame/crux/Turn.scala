@@ -18,7 +18,7 @@ object Turn {
          (previousState: GameState, playerTyped: String): (GameState, WhatHappens) = {
     gameDef.possibilities.find(_.triggeredBy(playerTyped)) match {
       case Some(action) => (modifyState(previousState, action), action.results)
-      case None => (previousState, NothingHappens)
+      case None => (previousState, thisHappens(IDontKnowHowTo(playerTyped)))
     }
   }
 
