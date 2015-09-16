@@ -8,7 +8,10 @@ case class Obstacle(condition: ActionCondition, sadness: MessageToThePlayer) {
 }
 
 case class Opportunity(trigger: Trigger, results: WhatHappens, conditions: Seq[ActionCondition], obstacles: Seq[Obstacle]) {
-  def take(previousState: GameState): WhatHappens = results
+  def take(previousState: GameState): WhatHappens =
+    obstacles.find(_.applies(previousState)).
+      map(obstacle => obstacle.results).
+      getOrElse(results)
 
   def available(gameState: GameState): Boolean = conditions.forall(ActionCondition.met(_, gameState))
 
