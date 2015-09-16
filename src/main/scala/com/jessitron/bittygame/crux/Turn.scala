@@ -16,7 +16,9 @@ object Turn {
 
   def act(gameDef: GameDefinition)
          (previousState: GameState, playerTyped: String): (GameState, WhatHappens) = {
-    gameDef.possibilities.find(_.triggeredBy(playerTyped)) match {
+    gameDef.possibilities.
+      filter(_.available(previousState)).
+      find(_.triggeredBy(playerTyped)) match {
       case Some(action) => (modifyState(previousState, action), action.results)
       case None => (previousState, thisHappens(IDontKnowHowTo(playerTyped)))
     }
