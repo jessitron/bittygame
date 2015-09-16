@@ -18,14 +18,14 @@ object Hungover {
       |  
       |  There had definitely been shots at some point...
       |  
-      |  oh God."
+      |  oh God.
       |  
-      |  So."
-      |  many."
-      |  shots."
+      |  So.
+      |  many.
+      |  shots.
       |  
       |  The memory of all that tequila turns your stomach and you quickly focus your
-      |  attention back to the present. The clock on the wall informs you that it\'s
+      |  attention back to the present. The clock on the wall informs you that it's
       |  already 1 p.m. so it\'s probably time to drag your sorry ass out of bed and get on with your day.
     """.stripMargin
 
