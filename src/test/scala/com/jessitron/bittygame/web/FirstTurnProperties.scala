@@ -19,7 +19,7 @@ class FirstTurnProperties
   property("unknown game returns 404") {
     forAll(scenarioTitleGen) { nonexistentGame: ScenarioTitle =>
       whenever(!scenarioDAO.names().contains(nonexistentGame)) {
-        Get(s"/scenario/$nonexistentGame/begin") ~> myRoute ~> check {
+        callToTheFirstGameEndpoint(nonexistentGame) ~> myRoute ~> check {
           assert(status === StatusCodes.NotFound)
         }
       }

@@ -87,7 +87,7 @@ trait BittyGameService extends HttpService {
     }
   }
 
-  private val createScenario: Route = path("game" / Segment) { seg =>
+  private val createScenario: Route = path("scenario" / Segment) { seg =>
     entity(as[Scenario]) { scenario =>
       put {
         complete(scenarioDAO.save(seg, scenario).map(_ => StatusCodes.Created))
