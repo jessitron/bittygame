@@ -46,15 +46,13 @@ class FullGameProperties
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario, someValidMoves, someInvalidMoves)
 
-  // The magic: prevent ScalaTest from shrinking the key, which is a string. This also prevents shrinking the other things. Oh well.
-  implicit val dontShrinkThisDammit: Shrink[(Scenario, Seq[String], Seq[String])] = Shrink(t => Stream())
-
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { input =>
       val (scenario, someValidMoves, someInvalidMoves) = input
       val key = scenario.title
       val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
 
+      /* Step 1: take the first turn */
       val gameID = callToTheFirstGameEndpoint(key) ~> myRoute ~> check {
         responseAs[GameResponse].gameID
       }
@@ -64,22 +62,40 @@ class FullGameProperties
           responseAs[GameResponse]
         }
 
-      def thingsWeCanThink() = callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
-        responseAs[Seq[String]]
+      /* Step 2: take more turns, get into some random place */
+      moves.foreach {move =>
+        takeMove(move)
       }
-      val thoughts = thingsWeCanThink()
 
-      val canDoAllTheThingsWeCanThink: Prop = Prop.all(thoughts.map { thought =>
-        wasRecognized(takeMove(thought)) :| s"tried move: $thought"
-      }: _*)
+      /* Step 3: perform the test: think */
+      val thoughts =
+        callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
+          responseAs[Seq[String]]
+        }
 
-      val inTheGameButWeDidntThink = scenario.possibilities.map(_.trigger).filterNot(thoughts.contains(_))
-      val canNotDoThingsWeDidntThinkOf = Prop.all(inTheGameButWeDidntThink.map { s =>
-        wasUnrecognized(takeMove(s)) :| s"tried move: $s"
-      } :_*)
+      /* Step 4: check the state of the output data in the world */
+      val canDoAllTheThingsWeCanThink: Prop =
+        Prop.all(
+          thoughts.map { thought =>
+            wasRecognized(takeMove(thought)) :| s"tried move: $thought"
+          }: _*)
 
-      val propertyResult = Test.check(Test.Parameters.default, canDoAllTheThingsWeCanThink && canNotDoThingsWeDidntThinkOf)
+      val inTheGameButWeDidntThink =
+        scenario.possibilities.map(_.trigger). // everything in the game
+          filterNot(thoughts.contains(_))      // that we didn't think of
 
+      val canNotDoThingsWeDidntThinkOf =
+        Prop.all(
+          inTheGameButWeDidntThink.map { s =>
+            wasUnrecognized(takeMove(s)) :| s"tried move: $s"
+          } :_*)
+
+      // using ScalaCheck internally to accumulate ACTUAL DATA about the failure
+      val propertyResult =
+        Test.check(Test.Parameters.default,
+          canDoAllTheThingsWeCanThink && canNotDoThingsWeDidntThinkOf)
+
+      /* Step 5: give Scalatest its exception if the properties don't hold */
       assert(propertyResult.passed, s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}")
       // and then take some moves and confirm that this is still true at every step
 
