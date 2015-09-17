@@ -2,6 +2,7 @@ package com.jessitron.bittygame.web
 
 import com.jessitron.bittygame.crux.{ScenarioTitle, Print, Scenario}
 import com.jessitron.bittygame.gen.{ScenarioTitleGen, GameStateGen}
+import com.jessitron.bittygame.web.identifiers.GameID
 import com.jessitron.bittygame.web.messages.GameResponse
 import com.jessitron.bittygame.web.ports.ScenarioDAO
 import org.scalacheck.{Shrink, Gen}
@@ -60,6 +61,11 @@ class FullGameProperties
           responseAs[Seq[String]]
         }
 
+        def takeMove(gameID: GameID, move: String) =
+          Get("/game/" + gameID + "/" + move) ~> myRoute ~> check {
+            responseAs[GameResponse]
+          }
+
       // Next: ok actually check that each of those are available
       // and that everythign else in our list is not.
 
@@ -67,7 +73,6 @@ class FullGameProperties
       // and then take some moves and confirm that this is still true at every step
 
         true
-      println("yay")
 
    //   }
 

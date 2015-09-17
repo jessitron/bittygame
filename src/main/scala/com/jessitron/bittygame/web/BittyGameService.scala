@@ -3,7 +3,7 @@ package com.jessitron.bittygame.web
 import akka.actor.Actor
 import com.jessitron.bittygame.crux._
 import com.jessitron.bittygame.scenarios.RandomScenario
-import com.jessitron.bittygame.web.messages.{CreateRandomScenarioResponse, GameTurn, GameResponse}
+import com.jessitron.bittygame.web.messages.{CreateRandomScenarioResponse, GameResponse}
 import com.jessitron.bittygame.web.ports.GameStateDAO.SaveResult
 import com.jessitron.bittygame.web.ports.{ScenarioDAO, TrivialGameStateDAO, GameStateDAO, TrivialScenarioDAO}
 import spray.http.HttpHeaders.{`Access-Control-Allow-Headers`, `Access-Control-Allow-Origin`}
@@ -52,20 +52,17 @@ trait BittyGameService extends HttpService {
     }
   }
 
-  private val act : Route = path("game" / Segment / "turn") {
-    gameName =>
-      post {
-        entity(as[GameTurn]) { turn =>
-
+  private val act : Route = path("game" / Segment / "turn" / Segment ) {
+    (gameID, move) =>
+      get {
           val act = for {
-            scenario <- scenarioDAO.retrieve(gameName)
-            gameState <- gameStates.recall(turn.gameID)
-            (newState, happenings) = Turn.act(scenario)(gameState, turn.playerMove)
-            save <- gameStates.update(turn.gameID, newState)
+            gameState <- gameStates.recall(gameID)
+            scenario <- scenarioDAO.retrieve(gameState.title)
+            (newState, happenings) = Turn.act(scenario)(gameState, move)
+            save <- gameStates.update(gameID, newState)
           } yield GameResponse(save.gameID, happenings.tellTheClient)
 
           handleNotFound("turn poo")(act)
-        }
       } ~
       options {
         // NO REALLY IT'S OK
