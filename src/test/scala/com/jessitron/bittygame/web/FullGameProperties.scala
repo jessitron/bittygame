@@ -71,7 +71,8 @@ class FullGameProperties
       } :_*)
 
       val propertyResult = Test.check(Test.Parameters.default, canDoAllTheThingsWeCanThink)
-      assert(propertyResult.passed, s"Failure: ${propertyResult.}")
+
+      assert(propertyResult.passed, s"Failure: ${labels(propertyResult.status)}\n, ")
       // and then take some moves and confirm that this is still true at every step
 
 
@@ -84,6 +85,13 @@ class FullGameProperties
     thing match {
       case IDontKnowHowTo(_) => true
       case _ => false
+    }
+
+
+  def labels(status: Test.Status): Set[String] =
+    status match {
+      case Test.Failed(_, labels) => labels
+      case _ => Set()
     }
 
   def wasRecognized(response: GameResponse): Prop = {
