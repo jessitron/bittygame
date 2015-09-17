@@ -1,6 +1,7 @@
 package com.jessitron.bittygame.web
 
 import com.jessitron.bittygame.crux.ScenarioTitle
+import com.jessitron.bittygame.web.identifiers.GameID
 import com.jessitron.bittygame.web.ports.{TrivialGameStateDAO, TrivialScenarioDAO}
 import org.scalatest.{Status, Args, Suite}
 import spray.testkit.ScalatestRouteTest
@@ -11,6 +12,8 @@ trait BittyGameServiceTestiness
   with BittyGameService {
 
   def callToTheFirstGameEndpoint(title: ScenarioTitle) =  Get(s"/scenario/${java.net.URLEncoder.encode(title, "UTF-8")}/begin")
+
+  def callToTheThinkEndpoint(gameID: GameID) =  Get(s"/game/${java.net.URLEncoder.encode(gameID, "UTF-8")}/think")
 
   abstract override def run(testName: Option[String], args: Args): Status = super.run(testName, args)
 

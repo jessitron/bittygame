@@ -76,8 +76,8 @@ trait BittyGameService extends HttpService {
   private val think: Route = path("game" / Segment / "think") { gameID =>
     get {
       val stuff = for{
-        state <-gameStates.recall(gameID)
-        scenario <-scenarioDAO.retrieve(state.title)
+        state <- gameStates.recall(gameID)
+        scenario <- scenarioDAO.retrieve(state.title)
       } yield Turn.think(scenario, state)
       handleNotFound("darn it")(stuff)
     } ~
@@ -118,7 +118,9 @@ trait BittyGameService extends HttpService {
     onComplete(x) {
       case Success(yay) => complete(yay)
       case Failure(t: ScenarioDAO.NotFoundException) =>
-        complete(StatusCodes.NotFound, complaint)
+        complete(StatusCodes.NotFound, complaint + " the scenario: " + t.getMessage)
+      case Failure(t: GameStateDAO.NotFoundException) =>
+        complete(StatusCodes.NotFound, complaint + " the state: " + t.getMessage)
       case Failure(other) => throw other // avoid compiler warning
     }
 }

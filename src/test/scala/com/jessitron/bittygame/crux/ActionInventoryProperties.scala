@@ -14,12 +14,14 @@ object ActionInventoryProperties extends Properties("Actions that provide invent
 
       val (scenarioWithoutOpportunity, gameState) = scenarioAndState
 
-      val actionProvidingItem = someAction.andProvides(item)
-      val scenario = scenarioWithoutOpportunity.addPossibility(actionProvidingItem)
+      (!scenarioWithoutOpportunity.possibilities.exists(_.conflictsWith(someAction))) ==> {
+        val actionProvidingItem = someAction.andProvides(item)
+        val scenario = scenarioWithoutOpportunity.addPossibility(actionProvidingItem)
 
-      val (nextState, wh) = Turn.act(scenario)(gameState, someAction.trigger)
+        val (nextState, wh) = Turn.act(scenario)(gameState, someAction.trigger)
 
-      nextState.hasItem(item) :| s"Item not in possession. Happenings: $wh"
+        nextState.hasItem(item) :| s"Item not in possession. Happenings: $wh"
+      }
     }
 
   property("If an opportunity requires an item, it is not available until we have the item") =
