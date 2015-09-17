@@ -10,11 +10,16 @@ object TurnProperties extends org.scalacheck.Properties("Taking a turn") with Ga
     Prop.forAll(scenarioAndStateGen, triggerGen, messageGen ) { (gameAndState, trigger, message) =>
       val (someScenario, gameState) = gameAndState
 
-      val scenario = someScenario.addPossibility(Opportunity.victory(trigger, message))
+      val win = Opportunity.victory(trigger, message)
 
-      val (newState, happenings) = Turn.act(scenario)(gameState, trigger)
+      (!someScenario.possibilities.exists(_.conflictsWith(win))) ==> {
 
-      happenings.results.contains(ExitGame) :| s"the results were ${happenings.results}"
+        val scenario = someScenario.addPossibility(win)
+
+        val (newState, happenings) = Turn.act(scenario)(gameState, trigger)
+
+        happenings.results.contains(ExitGame) :| s"the results were ${happenings.results}"
+      }
     }
 
   // TODO: all turns result either in IDontKnowHowTo OR any number of other things

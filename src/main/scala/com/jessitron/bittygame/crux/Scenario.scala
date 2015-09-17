@@ -34,7 +34,10 @@ object Opportunity {
 case class Scenario(title: ScenarioTitle,
                     possibilities: Seq[Opportunity],
                     welcome: MessageToThePlayer) {
-  def addPossibility(a: Opportunity) = copy(possibilities = possibilities :+ a)
+  def addPossibility(a: Opportunity) = {
+    assert(!possibilities.exists(_.conflictsWith(a)), "That conflicts with an existing possibility")
+    copy(possibilities = possibilities :+ a)
+  }
 }
 
 
