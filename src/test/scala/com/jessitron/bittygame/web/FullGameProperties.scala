@@ -5,7 +5,7 @@ import com.jessitron.bittygame.gen.{ScenarioTitleGen, GameStateGen}
 import com.jessitron.bittygame.web.identifiers.GameID
 import com.jessitron.bittygame.web.messages.GameResponse
 import com.jessitron.bittygame.web.ports.ScenarioDAO
-import org.scalacheck.{Shrink, Gen}
+import org.scalacheck.{Test, Prop, Shrink, Gen}
 import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
 import spray.json.DefaultJsonProtocol._
@@ -66,11 +66,12 @@ class FullGameProperties
 
       val thoughts = thingsWeCanThink()
 
-      val canDoAllTheThingsWeCanThink = thoughts.forall { thought =>
-        wasRecognized(takeMove(gameID, thought))
-      }
+      val canDoAllTheThingsWeCanThink: Prop = Prop.all(thoughts.map { thought =>
+        wasRecognized(takeMove(gameID, thought)) :| s"tried move: $thought"
+      } :_*)
 
-      assert(canDoAllTheThingsWeCanThink)
+      val propertyResult = Test.check(Test.Parameters.default, canDoAllTheThingsWeCanThink)
+      assert(propertyResult.passed, s"Failure: ${propertyResult.}")
       // and then take some moves and confirm that this is still true at every step
 
 
@@ -85,9 +86,10 @@ class FullGameProperties
       case _ => false
     }
 
-  def wasRecognized(response: GameResponse): Boolean = {
+  def wasRecognized(response: GameResponse): Prop = {
     val happenings = response.instructions
-    happenings.nonEmpty && !happenings.exists(iDontKnowHow)
+    (happenings.nonEmpty :| "something should happen") &&
+      (!happenings.exists(iDontKnowHow) :| "don't say I don't know how to")
   }
 
 
