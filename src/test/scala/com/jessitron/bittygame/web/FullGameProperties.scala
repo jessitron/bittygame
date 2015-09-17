@@ -52,34 +52,34 @@ class FullGameProperties
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { input =>
       val (scenario, someValidMoves, someInvalidMoves) = input
-        val key = scenario.title
+      val key = scenario.title
+      val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
 
-        val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
+      val gameID = callToTheFirstGameEndpoint(key) ~> myRoute ~> check {
+        responseAs[GameResponse].gameID
+      }
 
-        val gameID = callToTheFirstGameEndpoint(key) ~> myRoute ~> check {
-          responseAs[GameResponse].gameID
+      def takeMove(move: String) =
+        callToTheTurnEndpoint(gameID, move) ~> myRoute ~> check {
+          responseAs[GameResponse]
         }
 
-        def thingsWeCanThink() = callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
-          responseAs[Seq[String]]
-        }
-
-        def takeMove(gameID: GameID, move: String) =
-          callToTheTurnEndpoint(gameID, move) ~> myRoute ~> check {
-            responseAs[GameResponse]
-          }
-
+      def thingsWeCanThink() = callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
+        responseAs[Seq[String]]
+      }
       val thoughts = thingsWeCanThink()
 
       val canDoAllTheThingsWeCanThink: Prop = Prop.all(thoughts.map { thought =>
-        wasRecognized(takeMove(gameID, thought)) :| s"tried move: $thought"
-      } :_*)
+        wasRecognized(takeMove(thought)) :| s"tried move: $thought"
+      }: _*)
 
-      val propertyResult = Test.check(Test.Parameters.default, canDoAllTheThingsWeCanThink)
+      val inTheGameButWeDidntThink = scenario.possibilities.map(_.trigger).filterNot(thoughts.contains(_))
+      val canNotDoThingsWeDidntThinkOf = Prop.all(inTheGameButWeDidntThink.map { s => wasUnrecognized(takeMove(s))} :_*)
+
+      val propertyResult = Test.check(Test.Parameters.default, canDoAllTheThingsWeCanThink && canNotDoThingsWeDidntThinkOf)
 
       assert(propertyResult.passed, s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}")
       // and then take some moves and confirm that this is still true at every step
-
 
 
     }
@@ -103,6 +103,10 @@ class FullGameProperties
     val happenings = response.instructions
     (happenings.nonEmpty :| "something should happen") &&
       (!happenings.exists(iDontKnowHow) :| "don't say I don't know how to")
+  }
+
+  def wasUnrecognized(response: GameResponse) : Prop = {
+    response.instructions.exists(iDontKnowHow) :| "should say I don't know how"
   }
 
 
