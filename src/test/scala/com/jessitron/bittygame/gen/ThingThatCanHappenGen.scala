@@ -52,13 +52,17 @@ trait ThingThatCanHappenGen extends ItemGen {
 
   implicit val arbWhatHappens: Arbitrary[WhatHappens] = Arbitrary(takenOpportunityGen)
 
+  def printWhatHappens(wh: WhatHappens) = wh.results.map {
+    case Print(str) => s"print '$str'"
+    case ExitGame => "Exit!"
+    case Win => "WIN!!"
+    case Acquire(item) => s"Get $item"
+    case CantDoThat(s) => s"Can't do that because $s"
+    case IDontKnowHowTo(s) => s"Unknown option: $s"
+  }.mkString("\n      and ")
+
   implicit def prettyWhatHappens(wh: WhatHappens):Pretty = Pretty { p =>
-    wh.results.map {
-      case Print(str) => s"print '$str'"
-      case ExitGame => "Exit!"
-      case Win => "WIN!!"
-      case Acquire(item) => s"Get $item"
-    }.mkString("\n      and ")
+    printWhatHappens(wh)
   }
 
 }

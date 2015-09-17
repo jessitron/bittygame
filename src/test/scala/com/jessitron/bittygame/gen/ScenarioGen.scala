@@ -65,8 +65,11 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
 
   implicit val arbitraryOpportunity: Arbitrary[Opportunity] = Arbitrary(playerActionGen)
 
+  def printOpportunity(pa: Opportunity) =    s"Type ${pa.trigger} to " + printWhatHappens(pa.results) + "\n  if " + pa.conditions + "\n  unless " + pa.obstacles
+
+
   implicit def prettyOpportunity(pa: Opportunity):Pretty = Pretty { p =>
-    s"Type ${pa.trigger} to " + prettyWhatHappens(pa.results)(p) + "\n  if " + pa.conditions + "\n  unless " + pa.obstacles
+    printOpportunity(pa)
   }
 }
 
@@ -84,10 +87,12 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
 
   implicit val arbitraryScenario: Arbitrary[Scenario] = Arbitrary(scenarioGen)
 
+  def printScenario(g: Scenario) = s"Scenario: \n  Welcome: ${g.welcome}\n" +
+    g.possibilities.map(printOpportunity(_)).map("  " + _).mkString("\n")
+
   implicit def prettyScenario
   (g: Scenario): Pretty = Pretty { p =>
-    s"Scenario: \n  Welcome: ${g.welcome}\n" +
-      g.possibilities.map(prettyOpportunity(_)(p)).map("  " + _).mkString("\n")
+    printScenario(g)
   }
 
 }
