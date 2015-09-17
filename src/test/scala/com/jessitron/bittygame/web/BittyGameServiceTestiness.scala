@@ -11,9 +11,13 @@ trait BittyGameServiceTestiness
   with Suite
   with BittyGameService {
 
-  def callToTheFirstGameEndpoint(title: ScenarioTitle) =  Get(s"/scenario/${java.net.URLEncoder.encode(title, "UTF-8")}/begin")
+  private def encode(s: String) = java.net.URLEncoder.encode(s, "UTF-8")
 
-  def callToTheThinkEndpoint(gameID: GameID) =  Get(s"/game/${java.net.URLEncoder.encode(gameID, "UTF-8")}/think")
+  def callToTheFirstGameEndpoint(title: ScenarioTitle) =  Get(s"/scenario/${encode(title)}/begin")
+
+  def callToTheThinkEndpoint(gameID: GameID) =  Get(s"/game/${encode(gameID)}/think")
+
+  def callToTheTurnEndpoint(gameID: GameID, move: String) = Get(s"/game/${encode(gameID)}/${encode(move)}")
 
   abstract override def run(testName: Option[String], args: Args): Status = super.run(testName, args)
 

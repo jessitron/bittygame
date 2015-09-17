@@ -1,6 +1,6 @@
 package com.jessitron.bittygame.web
 
-import com.jessitron.bittygame.crux.{ScenarioTitle, Print, Scenario}
+import com.jessitron.bittygame.crux._
 import com.jessitron.bittygame.gen.{ScenarioTitleGen, GameStateGen}
 import com.jessitron.bittygame.web.identifiers.GameID
 import com.jessitron.bittygame.web.messages.GameResponse
@@ -37,9 +37,9 @@ class FullGameProperties
 
   val whatINeed: Gen[(ScenarioTitle, Seq[String], Seq[String])] = for {
     scenario <- storedScenario
-    validMoves = scenario.possibilities.map(_.trigger)
+    validMoves = scenario.possibilities.map(_.trigger) // TODO: that don't exit the game
     someValidMoves <- Gen.listOf(Gen.oneOf(validMoves))
-    someInvalidMoves <- Gen.listOf(triggerGen.suchThat(!someValidMoves.contains(_)))
+    someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario.title, someValidMoves, someInvalidMoves)
 
   // The magic: prevent ScalaTest from shrinking the key, which is a string. This also prevents shrinking the other things. Oh well.
@@ -48,8 +48,6 @@ class FullGameProperties
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { input =>
       val (key, someValidMoves, someInvalidMoves) = input
-      // sometimes shrinking is your enemy
-    //  (key.nonEmpty) ==> {
 
         val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
 
@@ -57,28 +55,40 @@ class FullGameProperties
           responseAs[GameResponse].gameID
         }
 
-        val think = callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
+        def thingsWeCanThink() = callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
           responseAs[Seq[String]]
         }
 
         def takeMove(gameID: GameID, move: String) =
-          Get("/game/" + gameID + "/" + move) ~> myRoute ~> check {
+          callToTheTurnEndpoint(gameID, move) ~> myRoute ~> check {
             responseAs[GameResponse]
           }
 
-      // Next: ok actually check that each of those are available
-      // and that everythign else in our list is not.
+      val thoughts = thingsWeCanThink()
 
+      val canDoAllTheThingsWeCanThink = thoughts.forall { thought =>
+        wasRecognized(takeMove(gameID, thought))
+      }
 
+      assert(canDoAllTheThingsWeCanThink)
       // and then take some moves and confirm that this is still true at every step
 
-        true
-
-   //   }
 
 
     }
 
   }
+
+  def iDontKnowHow(thing: ThingThatCanHappen): Boolean =
+    thing match {
+      case IDontKnowHowTo(_) => true
+      case _ => false
+    }
+
+  def wasRecognized(response: GameResponse): Boolean = {
+    val happenings = response.instructions
+    happenings.nonEmpty && !happenings.exists(iDontKnowHow)
+  }
+
 
 }

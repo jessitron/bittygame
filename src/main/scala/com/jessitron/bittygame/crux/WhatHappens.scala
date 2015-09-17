@@ -11,6 +11,10 @@ case class Acquire(item: Item) extends ThingThatCanHappen
 case class IDontKnowHowTo(what: String) extends ThingThatCanHappen
 case class CantDoThat(why: MessageToThePlayer) extends ThingThatCanHappen
 
+object ThingThatCanHappen {
+
+}
+
 case class WhatHappens(results: Seq[ThingThatCanHappen]) {
   def andMaybe(mightHappen: Option[ThingThatCanHappen]): WhatHappens =
     mightHappen match {
