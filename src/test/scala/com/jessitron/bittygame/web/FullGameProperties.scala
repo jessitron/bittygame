@@ -22,7 +22,6 @@ trait FullGameGen extends GameStateGen with ScenarioTitleGen {
 
   /*** STORE THEM ***/
   severalScenarios.foreach { case scenario => scenarioDAO.save(scenario.title, scenario)}
-  severalScenarios.foreach { case scenario => println(s"I haf proudly saved key <${scenario.title}>")}
 
   val storedScenario: Gen[Scenario] = Gen.oneOf(severalScenarios)
 
@@ -42,13 +41,12 @@ class FullGameProperties
     someInvalidMoves <- Gen.listOf(triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario.title, someValidMoves, someInvalidMoves)
 
-  // OMFG this was f-ing hard
+  // The magic: prevent ScalaTest from shrinking the key, which is a string. This also prevents shrinking the other things. Oh well.
   implicit val dontShrinkThisDammit: Shrink[(ScenarioTitle, Seq[String], Seq[String])] = Shrink(t => Stream())
 
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { input =>
       val (key, someValidMoves, someInvalidMoves) = input
-      println(s"Trying with fuck <$key>")
       // sometimes shrinking is your enemy
     //  (key.nonEmpty) ==> {
 
