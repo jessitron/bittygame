@@ -2,18 +2,12 @@ package com.jessitron.bittygame.web
 
 import com.jessitron.bittygame.crux._
 import com.jessitron.bittygame.gen.{ScenarioTitleGen, GameStateGen}
-import com.jessitron.bittygame.web.identifiers.GameID
 import com.jessitron.bittygame.web.messages.GameResponse
 import com.jessitron.bittygame.web.ports.ScenarioDAO
-import org.scalacheck.{Test, Prop, Shrink, Gen}
-import spray.httpx.SprayJsonSupport._
-import com.jessitron.bittygame.serialization._
-import spray.json.DefaultJsonProtocol._
+import org.scalacheck.{Test, Prop, Gen}
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalacheck.Prop.BooleanOperators
-
-import scala.concurrent.Await
 
 trait FullGameGen extends GameStateGen with ScenarioTitleGen {
 
@@ -49,81 +43,71 @@ class FullGameProperties
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { input =>
       val (scenario, someValidMoves, someInvalidMoves) = input
-      val key = scenario.title
+      val title = scenario.title
       val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
 
       /* Step 1: take the first turn */
-      val gameID = callToTheFirstGameEndpoint(key) ~> myRoute ~> check {
-        responseAs[GameResponse].gameID
-      }
-
-      def takeMove(move: String) =
-        callToTheTurnEndpoint(gameID, move) ~> myRoute ~> check {
-          responseAs[GameResponse]
-        }
+      val gameID = callBeginGame(title).gameID
 
       /* Step 2: take more turns, get into some random place */
-      moves.foreach {move =>
-        takeMove(move)
-      }
+      moves.foreach(callTakeTurn(gameID, _))
 
-      /* Step 3: perform the test: think */
-      val thoughts =
-        callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
-          responseAs[Seq[String]]
-        }
+      /* Step 3: perform the test */
+      val thoughts = callThink(gameID)
 
       /* Step 4: check the state of the output data in the world */
+      
+      def isRecognized(thought: String) : Prop = isRecognizedResponse(callTakeTurn(gameID, thought)) :| s"Not recognized: <$thought>"
       val canDoAllTheThingsWeCanThink: Prop =
         Prop.all(
-          thoughts.map { thought =>
-            wasRecognized(takeMove(thought)) :| s"tried move: $thought"
-          }: _*)
+          thoughts.map(isRecognized)
+          : _*)
 
-      val inTheGameButWeDidntThink =
-        scenario.possibilities.map(_.trigger). // everything in the game
+      val unthought =
+        allTriggers(scenario).                 // everything in the game
           filterNot(thoughts.contains(_))      // that we didn't think of
 
-      val canNotDoThingsWeDidntThinkOf =
+      def notRecognized(thought: String) : Prop = isUnrecognizedResponse(callTakeTurn(gameID, thought)) :| s"Oops, recognized: <$thought>"
+      val cannotDoThingsWeDidntThinkOf =
         Prop.all(
-          inTheGameButWeDidntThink.map { s =>
-            wasUnrecognized(takeMove(s)) :| s"tried move: $s"
-          } :_*)
+          unthought.map(notRecognized)
+            : _*)
 
-      // using ScalaCheck internally to accumulate ACTUAL DATA about the failure
+      // using ScalaCheck to accumulate ACTUAL DATA about the failure. Could have used Scalatest 'withClue' instead
       val propertyResult =
         Test.check(Test.Parameters.default,
-          canDoAllTheThingsWeCanThink && canNotDoThingsWeDidntThinkOf)
+          canDoAllTheThingsWeCanThink && cannotDoThingsWeDidntThinkOf)
 
       /* Step 5: give Scalatest its exception if the properties don't hold */
       assert(propertyResult.passed, s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}")
-      // and then take some moves and confirm that this is still true at every step
-
 
     }
 
   }
 
-  def iDontKnowHow(thing: ThingThatCanHappen): Boolean =
+  private def allTriggers(scenario: Scenario): Seq[String] =
+    scenario.possibilities.map(_.trigger)
+
+  private def iDontKnowHow(thing: ThingThatCanHappen): Boolean =
     thing match {
       case IDontKnowHowTo(_) => true
       case _ => false
     }
 
 
-  def labels(status: Test.Status): Set[String] =
+  private def labels(status: Test.Status): Set[String] =
     status match {
       case Test.Failed(_, labels) => labels
       case _ => Set()
     }
 
-  def wasRecognized(response: GameResponse): Prop = {
+  private def isRecognizedResponse(response: GameResponse): Prop = {
     val happenings = response.instructions
     (happenings.nonEmpty :| "something should happen") &&
       (!happenings.exists(iDontKnowHow) :| "don't say I don't know how to")
   }
 
-  def wasUnrecognized(response: GameResponse) : Prop = {
+  private def isUnrecognizedResponse(response: GameResponse) : Prop = {
     response.instructions.exists(iDontKnowHow) :| "should say I don't know how"
   }
 
