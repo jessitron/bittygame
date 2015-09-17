@@ -74,7 +74,9 @@ class FullGameProperties
       }: _*)
 
       val inTheGameButWeDidntThink = scenario.possibilities.map(_.trigger).filterNot(thoughts.contains(_))
-      val canNotDoThingsWeDidntThinkOf = Prop.all(inTheGameButWeDidntThink.map { s => wasUnrecognized(takeMove(s))} :_*)
+      val canNotDoThingsWeDidntThinkOf = Prop.all(inTheGameButWeDidntThink.map { s =>
+        wasUnrecognized(takeMove(s)) :| s"tried move: $s"
+      } :_*)
 
       val propertyResult = Test.check(Test.Parameters.default, canDoAllTheThingsWeCanThink && canNotDoThingsWeDidntThinkOf)
 

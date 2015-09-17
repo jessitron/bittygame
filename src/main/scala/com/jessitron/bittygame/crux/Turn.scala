@@ -35,7 +35,7 @@ object Turn {
     }
 
   def think(scenario: Scenario, gameState: GameState): Seq[String] = {
-      scenario.possibilities.filter(_.available(gameState)).map {
+      scenario.possibilities.filter(_.available(gameState)).take(1).map {
         _.trigger
       }
   }
