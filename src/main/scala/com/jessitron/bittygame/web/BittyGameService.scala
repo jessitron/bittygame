@@ -53,7 +53,9 @@ trait BittyGameService extends HttpService {
   }
 
   private val act : Route = path("game" / Segment / "turn" / Segment ) {
-    (gameID, move) =>
+    (seg1, seg2) =>
+      val gameID = java.net.URLDecoder.decode(seg1, "UTF-8")
+      val move   = java.net.URLDecoder.decode(seg2, "UTF-8")
       get {
           val act = for {
             gameState <- gameStates.recall(gameID)
@@ -70,7 +72,8 @@ trait BittyGameService extends HttpService {
       }
   }
 
-  private val think: Route = path("game" / Segment / "think") { gameID =>
+  private val think: Route = path("game" / Segment / "think") { seg =>
+    val gameID = java.net.URLDecoder.decode(seg, "UTF-8")
     get {
       val stuff = for{
         state <- gameStates.recall(gameID)

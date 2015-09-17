@@ -17,7 +17,7 @@ trait BittyGameServiceTestiness
 
   def callToTheThinkEndpoint(gameID: GameID) =  Get(s"/game/${encode(gameID)}/think")
 
-  def callToTheTurnEndpoint(gameID: GameID, move: String) = Get(s"/game/${encode(gameID)}/${encode(move)}")
+  def callToTheTurnEndpoint(gameID: GameID, move: String) = Get(s"/game/${encode(gameID)}/turn/${encode(move)}")
 
   abstract override def run(testName: Option[String], args: Args): Status = super.run(testName, args)
 
