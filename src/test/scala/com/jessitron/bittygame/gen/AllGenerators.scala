@@ -1,3 +1,3 @@
 package com.jessitron.bittygame.gen
 
-object AllGenerators extends GameStateGen with GameNameGen
+object AllGenerators extends GameStateGen with ScenarioTitleGen

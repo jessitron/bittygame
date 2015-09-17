@@ -5,7 +5,7 @@ import WhatHappens._
 object Turn {
 
   def firstTurn(scenario: Scenario): (GameState, WhatHappens) = {
-    val initialState = GameState.init
+    val initialState = GameState.init(scenario.title)
     val print = Print(scenario.welcome)
     val exit = if (availableOptions(scenario, initialState).isEmpty) Some(ExitGame) else None
     (initialState, thisHappens(print).andMaybe(exit))

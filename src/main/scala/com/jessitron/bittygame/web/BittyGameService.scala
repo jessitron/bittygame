@@ -1,10 +1,9 @@
 package com.jessitron.bittygame.web
 
 import akka.actor.Actor
-import com.jessitron.bittygame.crux.{GameState, Turn, Scenario}
+import com.jessitron.bittygame.crux._
 import com.jessitron.bittygame.scenarios.RandomScenario
 import com.jessitron.bittygame.web.messages.{CreateRandomScenarioResponse, GameTurn, GameResponse}
-import com.jessitron.bittygame.web.identifiers.ScenarioKey
 import com.jessitron.bittygame.web.ports.GameStateDAO.SaveResult
 import com.jessitron.bittygame.web.ports.{ScenarioDAO, TrivialGameStateDAO, GameStateDAO, TrivialScenarioDAO}
 import spray.http.HttpHeaders.{`Access-Control-Allow-Headers`, `Access-Control-Allow-Origin`}
@@ -40,7 +39,7 @@ trait BittyGameService extends HttpService {
   val scenarioDAO: ScenarioDAO
   val gameStates: GameStateDAO
 
-  private val firstTurn: Route = path("game" / Segment / "begin") { seg =>
+  private val firstTurn: Route = path("scenario" / Segment / "begin") { seg =>
     val gameName = java.net.URLDecoder.decode(seg, "UTF-8")
     get { // refactor into for comprehension?
       def theFutureIsGreat = scenarioDAO.retrieve(gameName).map { scenario =>
@@ -74,25 +73,16 @@ trait BittyGameService extends HttpService {
       }
   }
 
-  private def handleNotFound[X](complaint: String)(x: Future[X])(implicit ev1: X => ToResponseMarshallable) =
-    onComplete(x) {
-      case Success(yay) => complete(yay)
-      case Failure(t: ScenarioDAO.NotFoundException) =>
-        complete(StatusCodes.NotFound, complaint)
-      case Failure(other) => throw other // avoid compiler warning
-    }
-
-  private val think: Route = path("game" / Segment / "think") { seg =>
-    post {
-      entity(as[GameState]) { state =>
-        def stuff = scenarioDAO.retrieve(seg).map { scenario =>
-          Turn.think(scenario, state)
-        }
-       handleNotFound("darn it")(stuff)
-      }
+  private val think: Route = path("game" / Segment / "think") { gameID =>
+    get {
+      val stuff = for{
+        state <-gameStates.recall(gameID)
+        scenario <-scenarioDAO.retrieve(state.title)
+      } yield Turn.think(scenario, state)
+      handleNotFound("darn it")(stuff)
     } ~
     options {
-      // NO REALLY IT'S OK TO POST
+      // NO REALLY IT'S OK
       respondWithHeaders(allowOrdinaryHeaders) { complete(StatusCodes.OK) }
     }
   }
@@ -108,18 +98,27 @@ trait BittyGameService extends HttpService {
   private val createRandomGame: Route = path ("random") {
     (get | put) {
       complete {
-        val newName = RandomScenario.name(scenarioDAO.names())
-        scenarioDAO.save(newName, RandomScenario.create()).map(
-          _ => CreateRandomScenarioResponse(newName, firstTurnUrl(newName))
+        val newScenario = RandomScenario.create()
+        scenarioDAO.save(newScenario.title, newScenario).map(
+          _ => CreateRandomScenarioResponse(newScenario.title, firstTurnUrl(newScenario.title))
         ).map( x => StatusCodes.Created -> x)
       }
     }
   }
 
-  def firstTurnUrl(name: ScenarioKey): String = {
-    s"/game/${java.net.URLEncoder.encode(name, "UTF-8")}/begin"
+  def firstTurnUrl(name: ScenarioTitle): String = {
+    s"/scenario/${java.net.URLEncoder.encode(name, "UTF-8")}/begin"
   }
 
   val myRoute =
     respondWithHeaders(allowOriginHeader) { firstTurn ~ act ~ createScenario ~ createRandomGame ~ think }
+
+
+  private def handleNotFound[X](complaint: String)(x: Future[X])(implicit ev1: X => ToResponseMarshallable) =
+    onComplete(x) {
+      case Success(yay) => complete(yay)
+      case Failure(t: ScenarioDAO.NotFoundException) =>
+        complete(StatusCodes.NotFound, complaint)
+      case Failure(other) => throw other // avoid compiler warning
+    }
 }

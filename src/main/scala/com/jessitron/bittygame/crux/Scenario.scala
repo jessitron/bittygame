@@ -31,8 +31,9 @@ object Opportunity {
     this.printing(trigger, printed).andWin.andExit
 }
 
-case class Scenario(possibilities: Seq[Opportunity],
-                          welcome: MessageToThePlayer) {
+case class Scenario(title: ScenarioTitle,
+                    possibilities: Seq[Opportunity],
+                    welcome: MessageToThePlayer) {
   def addPossibility(a: Opportunity) = copy(possibilities = possibilities :+ a)
 }
 

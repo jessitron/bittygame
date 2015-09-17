@@ -4,4 +4,6 @@ package object crux {
    type MessageToThePlayer = String
 
    type Trigger = String
+
+   type ScenarioTitle = String
 }

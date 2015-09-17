@@ -20,7 +20,8 @@ object GeneratorNoticer extends GameStateGen {
   }
 
   def countPopulated[T](g: Gen[T], n: Int) = {
-    val noValue = Iterator.continually(g.sample).take(n).collect{ case None => 1 }.length
+    val noValue = Iterator.continually(g.sample).
+      take(n).collect{ case None => 1 }.length
 
     noValue * 100 / n
   }

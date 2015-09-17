@@ -20,12 +20,12 @@ class BittyGameServiceSpec extends org.scalatest.PropSpec
            welcomeMessageGen)
     { (someActions: Seq[Opportunity],
        message: MessageToThePlayer) =>
-      val someGame = Scenario(Seq(), message)
-      Put("/game/yolo", someGame) ~> myRoute ~> check {
+      val someGame = Scenario("yolo", Seq(), message)
+      Put("/scenario/yolo", someGame) ~> myRoute ~> check {
         status should be(Created)
       }
 
-      Get("/game/yolo/begin") ~> myRoute ~> check {
+      Get("/scenario/yolo/begin") ~> myRoute ~> check {
         responseAs[GameResponse].instructions should contain(Print(message))
       }
     }

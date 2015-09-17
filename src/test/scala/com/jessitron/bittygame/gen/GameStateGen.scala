@@ -6,13 +6,13 @@ import org.scalacheck.{Arbitrary, Gen}
 
 trait GameStateGen extends ScenarioGen with ItemGen {
 
-  def gameStateGen(scenario: Scenario): Gen[GameState] = GameState.init // TODO: use the items in the game
+  def gameStateGen(scenario: Scenario): Gen[GameState] = GameState.init(scenario.title) // TODO: use the items in the game
 
   val independentGameStateGen : Gen[GameState] =
     for {
       itemCount <- Gen.choose(0,4)
       items <- Gen.listOfN(itemCount, itemGen)
-    } yield GameState(items)
+    } yield GameState("Some game or other", items)
 
   def scenarioAndStateGen: Gen[(Scenario, GameState)] =
     for {

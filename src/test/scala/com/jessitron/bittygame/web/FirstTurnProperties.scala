@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.web
 
-import com.jessitron.bittygame.gen.GameNameGen
-import com.jessitron.bittygame.web.identifiers.ScenarioKey
+import com.jessitron.bittygame.crux.ScenarioTitle
+import com.jessitron.bittygame.gen.ScenarioTitleGen
 import com.jessitron.bittygame.web.messages.CreateRandomScenarioResponse
 import org.scalatest.{PropSpec, Assertions}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
@@ -14,12 +14,12 @@ class FirstTurnProperties
   with GeneratorDrivenPropertyChecks
   with BittyGameServiceTestiness
   with Assertions
-  with GameNameGen {
+  with ScenarioTitleGen {
 
   property("unknown game returns 404") {
-    forAll(gameNameGen) { nonexistentGame: ScenarioKey =>
+    forAll(scenarioTitleGen) { nonexistentGame: ScenarioTitle =>
       whenever(!scenarioDAO.names().contains(nonexistentGame)) {
-        Get(s"/game/$nonexistentGame/begin") ~> myRoute ~> check {
+        Get(s"/scenario/$nonexistentGame/begin") ~> myRoute ~> check {
           assert(status === StatusCodes.NotFound)
         }
       }

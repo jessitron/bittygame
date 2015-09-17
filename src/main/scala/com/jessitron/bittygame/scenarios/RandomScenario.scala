@@ -2,8 +2,7 @@ package com.jessitron.bittygame.scenarios
 
 import java.nio.file.{Path, Files}
 
-import com.jessitron.bittygame.crux.{Opportunity, Scenario}
-import com.jessitron.bittygame.web.identifiers.ScenarioKey
+import com.jessitron.bittygame.crux._
 import org.scalacheck.Gen
 
 import scala.io.Source
@@ -14,33 +13,24 @@ object RandomScenario {
     readResource("/firstPartOfSentence.txt"),
     readResource("/secondPartOfSentence.txt"),
     readResource("/nouns.txt"),
-    readResource("/verbs.txt")
+    readResource("/verbs.txt"),
+    readResource("/names.txt")
   )
-  lazy val defaultNamer = new RandomName(readResource("/names.txt"))
 
   def create() = defaultGameGen.create()
 
-  def name(excluding: Seq[String]) = defaultNamer.name(excluding)
-
-}
-
-class RandomName(names: Seq[String]) {
-  val nameGen = for {
-    happyName <- Gen.oneOf("pinkiepie", "heidegger", names:_*)
-    stupidNumber <- Gen.choose(1, 10000)
-  } yield s"$happyName$stupidNumber"
-
-  def name(excluding: Seq[String]): ScenarioKey = try {
-    Util.untilYouGetOne(nameGen.suchThat(!excluding.contains(_)).sample)
-  } catch {
-    case t : RuntimeException => throw new RuntimeException (s"excluded: $excluding", t)
-  }
 }
 
 class RandomScenario(firstPartsOfSentence: Seq[String],
                  secondPartsOfSentence: Seq[String],
                  nouns: Seq[String],
-                 verbs: Seq[String]) {
+                 verbs: Seq[String],
+                 names: Seq[String]) {
+
+  private val nameGen = for {
+    happyName <- Gen.oneOf("pinkiepie", "heidegger", names:_*)
+    stupidNumber <- Gen.choose(1, 10000)
+  } yield s"$happyName$stupidNumber"
 
   private val funSentence: Gen[String] = for {
     firstPart <- Gen.oneOf("You see", "All around you swarm", firstPartsOfSentence :_*)
@@ -64,10 +54,11 @@ class RandomScenario(firstPartsOfSentence: Seq[String],
   } yield Opportunity.victory(s"$verb $noun", "Woot! You win!")
 
   def funGameGen(numActions: Int) : Gen[Scenario] = for {
+    title <- nameGen
     welcomeMessage <- funMessage(5)
     actions <- Gen.listOfN(numActions, funAction)
     winningAction <- victory.suchThat(v => !actions.exists(_.conflictsWith(v)))
-  } yield Scenario(scala.util.Random.shuffle(actions :+ winningAction), welcomeMessage)
+  } yield Scenario(title, scala.util.Random.shuffle(actions :+ winningAction), welcomeMessage)
 
   def create(): Scenario = Util.untilYouGetOne(funGameGen(numActions = 5).sample)
 

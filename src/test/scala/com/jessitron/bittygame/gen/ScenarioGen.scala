@@ -70,16 +70,17 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
   }
 }
 
-trait ScenarioGen extends OpportunityGen {
+trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
 
   val possibilitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(playerActionGen))
 
   val welcomeMessageGen: Gen[MessageToThePlayer] = nonEmptyString
 
   val scenarioGen = for {
+    title <- scenarioTitleGen
     possibilities <- possibilitiesGen
     welcome <- welcomeMessageGen
-  } yield Scenario(possibilities, welcome)
+  } yield Scenario(title, possibilities, welcome)
 
   implicit val arbitraryScenario: Arbitrary[Scenario] = Arbitrary(scenarioGen)
 
