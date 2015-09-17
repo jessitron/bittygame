@@ -58,11 +58,15 @@ class FullGameProperties
           responseAs[GameResponse].gameID
         }
 
-        // Next: change "think" to take a gameID and look up the state
-
         val think = callToTheThinkEndpoint(gameID) ~> myRoute ~> check {
           responseAs[Seq[String]]
         }
+
+      // Next: ok actually check that each of those are available
+      // and that everythign else in our list is not.
+
+
+      // and then take some moves and confirm that this is still true at every step
 
         true
       println("yay")
