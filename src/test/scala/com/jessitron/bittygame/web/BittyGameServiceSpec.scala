@@ -26,7 +26,7 @@ class BittyGameServiceSpec extends org.scalatest.PropSpec
 
       val someGame = Scenario(title, someActions, message)
 
-      Put("/scenario/" + encode(title), someGame) ~> myRoute ~> check {
+      Put("/scenario/", someGame) ~> myRoute ~> check {
         status should be(Created)
       }
 

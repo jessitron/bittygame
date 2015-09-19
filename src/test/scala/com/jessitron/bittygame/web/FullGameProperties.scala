@@ -18,7 +18,7 @@ trait FullGameGen extends GameStateGen with ScenarioTitleGen {
     Iterator.continually(scenarioGen.sample).collect{ case Some(a) => a}.take(SCENARIOS_TO_GENERATE).toSeq
 
   /*** STORE THEM ***/
-  severalScenarios.foreach { case scenario => scenarioDAO.save(scenario.title, scenario)}
+  severalScenarios.foreach { case scenario => scenarioDAO.save(scenario)}
 
   val storedScenario: Gen[Scenario] = Gen.oneOf(severalScenarios)
 

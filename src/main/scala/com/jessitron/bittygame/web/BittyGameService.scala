@@ -27,7 +27,7 @@ class BittyGameServiceActor extends Actor with BittyGameService {
   val scenarioDAO = new TrivialScenarioDAO() // for realz, I'd put this in an actor
   val gameStates = new TrivialGameStateDAO() // for realz, I'd put this in an actor
 
-  scenarioDAO.save("hungover", com.jessitron.bittygame.scenarios.Hungover.scenario)
+  scenarioDAO.save(com.jessitron.bittygame.scenarios.Hungover.scenario)
 }
 
 trait BittyGameService extends HttpService {
@@ -87,11 +87,10 @@ trait BittyGameService extends HttpService {
     }
   }
 
-  private val createScenario: Route = path("scenario" / Segment) { seg =>
-    val title = java.net.URLDecoder.decode(seg, "UTF-8")
+  private val createScenario: Route = path("scenario/") {
     entity(as[Scenario]) { scenario =>
       put {
-        complete(scenarioDAO.save(title, scenario).map(_ => StatusCodes.Created))
+        complete(scenarioDAO.save(scenario).map(_ => StatusCodes.Created))
       }
     }
   }
@@ -100,7 +99,7 @@ trait BittyGameService extends HttpService {
     (get | put) {
       complete {
         val newScenario = RandomScenario.create()
-        scenarioDAO.save(newScenario.title, newScenario).map(
+        scenarioDAO.save(newScenario).map(
           _ => CreateRandomScenarioResponse(newScenario.title, firstTurnUrl(newScenario.title))
         ).map( x => StatusCodes.Created -> x)
       }

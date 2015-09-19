@@ -9,7 +9,7 @@ import com.jessitron.bittygame.crux.{ScenarioTitle, Scenario}
 // this could hook up to another service, or a database, or be a simple cache
 trait ScenarioDAO {
   import ScenarioDAO._
-  def save(name: ScenarioTitle, scenario: Scenario): Future[SaveResult]
+  def save(scenario: Scenario): Future[SaveResult]
   def retrieve(name: ScenarioTitle): Future[Scenario]
   def names(): Seq[ScenarioTitle]
 }
@@ -26,8 +26,8 @@ class TrivialScenarioDAO extends ScenarioDAO {
       case Some(d) => Future.successful(d)
       case None => Future.failed(new ScenarioDAO.NotFoundException(s"Undefined game: $name"))
     }
-  override def save(name: ScenarioTitle, scenario: Scenario): Future[SaveResult] = {
-    scenarioCache = scenarioCache + (name -> scenario)
+  override def save(scenario: Scenario): Future[SaveResult] = {
+    scenarioCache = scenarioCache + (scenario.title -> scenario)
     Future.successful(())
   }
 
