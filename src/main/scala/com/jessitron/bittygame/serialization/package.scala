@@ -6,8 +6,8 @@ import spray.json.DefaultJsonProtocol._
 
 package object serialization {
 
-  implicit def actionConditionWriter(implicit itemFormat: JsonFormat[Item]): JsonFormat[ActionCondition] = new JsonFormat[ActionCondition] {
-    override def write(obj: ActionCondition): JsValue = {
+  implicit def actionConditionWriter(implicit itemFormat: JsonFormat[Item]): JsonFormat[Condition] = new JsonFormat[Condition] {
+    override def write(obj: Condition): JsValue = {
       val fields = obj match {
         case Has(item) => Map("type" -> JsString("has"), "item" -> itemFormat.write(item))
       }
@@ -17,7 +17,7 @@ package object serialization {
     private def fail(why: String, json: JsValue): Nothing =
       throw new RuntimeException(s"Could not deserialize ActionCondition; $why. Received:${json.prettyPrint}")
 
-    override def read(json: JsValue): ActionCondition = {
+    override def read(json: JsValue): Condition = {
       val mappy = json.asInstanceOf[JsObject].fields
       mappy.getOrElse("type", fail("no type", json)) match {
         case JsString("has") => Has(itemFormat.read(mappy.getOrElse("item", fail("Has needs item", json))))
