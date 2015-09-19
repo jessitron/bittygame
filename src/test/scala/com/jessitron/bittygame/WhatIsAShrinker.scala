@@ -25,13 +25,13 @@ object WhatIsAShrinker extends ScenarioGen {
     println("shrink a string:")
     smallerStrings.foreach(a => println("<" + a + ">"))
 
-    printTheShrinks(scenarioGen, "scenario")
+    printTheShrinks(scenarioGen, "scenario")(scenarioShrink)
 
-    printTheShrinks(scenarioTitleGen, "title")
+    printTheShrinks(scenarioTitleGen, "title")(nonEmptyShrinker)
 
     printTheShrinks(opportunitiesGen, "opportunities")
 
-    printTheShrinks(oneOpportunityGen, "one opportunity")
+    printTheShrinks(oneOpportunityGen, "one opportunity")(oneOpportunityShrink)
 
   }
 
