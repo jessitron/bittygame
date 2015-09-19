@@ -1,8 +1,9 @@
-package com.jessitron.bittygame.crux
+package com.jessitron.bittygame.games
 
+import com.jessitron.bittygame.crux.{Scenario, Turn, TurnProperties, Win}
 import com.jessitron.bittygame.scenarios.RandomScenario
-import org.scalacheck.{Gen, Properties, Prop}
 import org.scalacheck.Prop._
+import org.scalacheck.{Gen, Prop, Properties}
 
 object RandomGameProperties extends Properties("Valid games") {
 
