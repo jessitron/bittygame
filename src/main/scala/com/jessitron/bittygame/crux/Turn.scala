@@ -11,19 +11,25 @@ object Turn {
     (initialState, thisHappens(print).andMaybe(exit))
   }
 
-  private def availableOptions(scenario: Scenario, gameState: GameState): Seq[Opportunity] =
-    scenario.possibilities.filter(_.available(gameState))
-
   def act(scenario: Scenario)
          (previousState: GameState, playerTyped: String): (GameState, WhatHappens) = {
-    scenario.possibilities.
-      filter(_.available(previousState)).
+    availableOptions(scenario, previousState).
       find(_.triggeredBy(playerTyped)) match {
       case Some(action) =>
         (modifyState(previousState, action), action.take(previousState))
-      case None => (previousState, thisHappens(IDontKnowHowTo(playerTyped)))
+      case None =>
+        (previousState, thisHappens(IDontKnowHowTo(playerTyped)))
     }
   }
+
+  def think(scenario: Scenario, gameState: GameState): Seq[String] = {
+    availableOptions(scenario, gameState).map {
+      _.trigger
+    }
+  }
+
+  private def availableOptions(scenario: Scenario, gameState: GameState): Seq[Opportunity] =
+    scenario.possibilities.filter(_.available(gameState))
 
   private def modifyState(previousState: GameState, action: Opportunity): GameState =
     action.results.results.foldLeft(previousState)(modifyStatePerHappening)
@@ -34,10 +40,5 @@ object Turn {
       case _ => previousState
     }
 
-  def think(scenario: Scenario, gameState: GameState): Seq[String] = {
-      scenario.possibilities.filter(_.available(gameState)).map {
-        _.trigger
-      }
-  }
 
 }
