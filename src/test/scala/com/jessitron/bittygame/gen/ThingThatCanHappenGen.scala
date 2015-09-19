@@ -1,5 +1,7 @@
 package com.jessitron.bittygame.gen
 
+import java.lang.Math.min
+
 import com.jessitron.bittygame.crux._
 import org.scalacheck.util.Pretty
 import org.scalacheck.{Gen, Arbitrary}
@@ -7,11 +9,7 @@ import scala.util.Random.shuffle
 
 trait ThingThatCanHappenGen extends ItemGen {
 
-  val printGen =
-    for {
-      str <- Gen.alphaStr
-      if str.nonEmpty
-    } yield Print(str)
+  val printGen = nonEmptyString.map(Print(_))
 
   val exitGen = Gen.const(ExitGame)
   val winGen = Gen.const(Win)
@@ -30,27 +28,36 @@ trait ThingThatCanHappenGen extends ItemGen {
     )
 
   implicit val arbThing: Arbitrary[ThingThatCanHappen] = Arbitrary(thingGen)
+
+  def acquireSomeOf(noMoreThan: Int, itemsInGame: Seq[Item]) = for {
+    howManyItems <- Gen.choose(1, min(noMoreThan, itemsInGame.length))
+    acquireAnItem = Gen.oneOf(itemsInGame).map(Acquire(_))
+    itemsToAcquire <- Gen.listOfN(howManyItems, acquireAnItem)
+  } yield itemsToAcquire
   
-  val thingsThatHappenWhenYouTakeAnOpportunityGen = for {
-    howMany <- Gen.choose(1,6)
-    one <- printGen
-    two <- winGen
-    three <- exitGen
-    howManyItems <- Gen.choose(1, howMany)
-    itemsToAcquire <- Gen.listOfN(howManyItems, getAThingGen)
-  } yield {
-      val stuff = shuffle(Seq(one,two,three) ++ itemsToAcquire).take(howMany)
+  def thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame: Seq[Item]) =
+    for {
+      howMany <- Gen.choose(1,6)
+      one <- printGen
+      two <- winGen
+      three <- exitGen
+      more <- acquireSomeOf(howMany, itemsInGame)
+    } yield {
+      val stuff = shuffle(Seq(one,two,three) ++ more).take(howMany)
       WhatHappens(stuff)
     }
   
   val anythingCouldHappenGen =
-    Gen.oneOf(
-      thingsThatHappenWhenYouTakeAnOpportunityGen,
-      dontKnowHowGen.map(WhatHappens.thisHappens),
-      cantDoItGen.map(WhatHappens.thisHappens)
-    )
+    for {
+      aListOfItems <- someItems
+      something <- Gen.oneOf(
+        thingsThatHappenWhenYouTakeAnOpportunityGen(aListOfItems),
+        dontKnowHowGen.map(WhatHappens.thisHappens),
+        cantDoItGen.map(WhatHappens.thisHappens)
+      )
+    } yield something
 
-  implicit val arbWhatHappens: Arbitrary[WhatHappens] = Arbitrary(thingsThatHappenWhenYouTakeAnOpportunityGen)
+  implicit val arbWhatHappens: Arbitrary[WhatHappens] = Arbitrary(someItems.flatMap(thingsThatHappenWhenYouTakeAnOpportunityGen))
 
   def printWhatHappens(wh: WhatHappens) = wh.results.map {
     case Print(str) => s"print '$str'"

@@ -48,13 +48,13 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
 
   val alwaysAvailableOpportunity : Gen[Opportunity] = for {
     trigger <- triggerGen
-    whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen
+    whatHappens <- someItems.flatMap(thingsThatHappenWhenYouTakeAnOpportunityGen(_))
   } yield  Opportunity(trigger, whatHappens, Seq(), Seq())
 
   def opportunityGen(itemsInGame: Seq[Item]): Gen[Opportunity] =
     for {
       trigger <- triggerGen
-      whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen
+      whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame)
       obstacles <- obstaclesGen(itemsInGame)
       conditions <- conditionsGen(itemsInGame)
     } yield  Opportunity(trigger, whatHappens, conditions, obstacles)

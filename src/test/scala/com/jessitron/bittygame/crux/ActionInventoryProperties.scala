@@ -20,7 +20,7 @@ object ActionInventoryProperties extends Properties("Actions that provide invent
 
         val (nextState, wh) = Turn.act(scenario)(gameState, someAction.trigger)
 
-        nextState.hasItem(item) :| s"Item not in possession. Happenings: $wh"
+        nextState.hasItem(item) :| s"Item should be in possession. Happenings: $wh"
       }
     }
 
