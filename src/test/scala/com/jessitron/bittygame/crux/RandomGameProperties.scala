@@ -3,7 +3,6 @@ package com.jessitron.bittygame.crux
 import com.jessitron.bittygame.scenarios.RandomScenario
 import org.scalacheck.{Gen, Properties, Prop}
 import org.scalacheck.Prop._
-import com.jessitron.bittygame.gen._
 
 object RandomGameProperties extends Properties("Valid games") {
 
@@ -21,7 +20,7 @@ object RandomGameProperties extends Properties("Valid games") {
   property("It never suggests the empty string at first") =
     Prop.forAll(randomGameGen) { scenario =>
       val (gameState, _) = Turn.firstTurn(scenario)
-      ThinkProperties.neverThinkOfBlank(scenario, gameState)
+      TurnProperties.neverThinkOfBlank(scenario, gameState)
     }
 
 
