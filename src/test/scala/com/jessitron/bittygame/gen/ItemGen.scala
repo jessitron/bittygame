@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.gen
 
 import com.jessitron.bittygame.crux.Item
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.{Shrink, Arbitrary, Gen}
 
 trait NonEmptyStringGen {
 
@@ -14,7 +14,9 @@ trait NonEmptyStringGen {
     chars <- Gen.listOfN(howMany, allTheChars)
   } yield new String(chars.toArray)
 
-  val nonEmptyString = shortStringOfAnything.suchThat(_.nonEmpty) // this for shrinking
+  val nonEmptyString = shortStringOfAnything
+
+  val nonEmptyShrinker: Shrink[String] = Shrink { str => Shrink.shrink(str).filter(_.nonEmpty)}
 }
 
 trait ItemGen extends NonEmptyStringGen {

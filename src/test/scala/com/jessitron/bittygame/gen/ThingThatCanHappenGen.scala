@@ -4,7 +4,7 @@ import java.lang.Math.min
 
 import com.jessitron.bittygame.crux._
 import org.scalacheck.util.Pretty
-import org.scalacheck.{Gen, Arbitrary}
+import org.scalacheck.{Shrink, Gen, Arbitrary}
 import scala.util.Random.shuffle
 
 trait ThingThatCanHappenGen extends ItemGen {
@@ -35,7 +35,7 @@ trait ThingThatCanHappenGen extends ItemGen {
     itemsToAcquire <- Gen.listOfN(howManyItems, acquireAnItem)
   } yield itemsToAcquire
   
-  def thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame: Seq[Item]) =
+  def thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame: Seq[Item]): Gen[WhatHappens] =
     for {
       howMany <- Gen.choose(1,6)
       one <- printGen
@@ -46,6 +46,11 @@ trait ThingThatCanHappenGen extends ItemGen {
       val stuff = shuffle(Seq(one,two,three) ++ more).take(howMany)
       WhatHappens(stuff)
     }
+
+  implicit val whatHappensShrink: Shrink[WhatHappens] = Shrink {
+    orig =>
+      Shrink.shrink(orig.results).map(x => orig.copy(results = x))
+  }
   
   val anythingCouldHappenGen =
     for {

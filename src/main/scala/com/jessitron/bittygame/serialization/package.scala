@@ -21,6 +21,7 @@ package object serialization {
       val mappy = json.asInstanceOf[JsObject].fields
       mappy.getOrElse("type", fail("no type", json)) match {
         case JsString("has") => Has(itemFormat.read(mappy.getOrElse("item", fail("Has needs item", json))))
+        case _ => throw new RuntimeException("I don't know how to deserialize this condition: " + json.prettyPrint)
       }
     }
   }

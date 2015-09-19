@@ -1,8 +1,7 @@
 package com.jessitron.bittygame.gen
 
 import com.jessitron.bittygame.crux._
-import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
+import org.scalacheck.{Shrink, Arbitrary, Gen}
 import org.scalacheck.util.Pretty
 import Math.min
 
@@ -64,6 +63,16 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
     opportunity <- opportunityGen(randomItems)
   } yield opportunity
 
+  implicit val oneOpportunityShrink: Shrink[Opportunity] = Shrink {
+    orig: Opportunity =>
+      val fewerObstacles = Shrink.shrink(orig.obstacles).map(x => orig.copy(obstacles = x))
+      val fewerConditions = Shrink.shrink(orig.conditions).map(x => orig.copy(conditions = x))
+      val fewerHappenings = Shrink.shrink(orig.results).map(x => orig.copy(results = x))
+      val shorterTrigger = nonEmptyShrinker.shrink(orig.trigger).map(x => orig.copy(trigger = x))
+
+      fewerObstacles ++ fewerConditions ++ fewerHappenings ++ shorterTrigger
+  }
+
   implicit val arbitraryOpportunity: Arbitrary[Opportunity] = Arbitrary(oneOpportunityGen)
 
   def printOpportunity(pa: Opportunity) =    s"Type ${pa.trigger} to " + printWhatHappens(pa.results) + "\n  if " + pa.conditions + "\n  unless " + pa.obstacles
@@ -80,11 +89,17 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
 
   val welcomeMessageGen: Gen[MessageToThePlayer] = nonEmptyString
 
-  val scenarioGen = for {
+  val scenarioGen: Gen[Scenario] = for {
     title <- scenarioTitleGen
     possibilities <- opportunitiesGen
     welcome <- welcomeMessageGen
   } yield Scenario(title, possibilities, welcome)
+
+  implicit val scenarioShrink =
+    Shrink{ s: Scenario =>
+      val opportunityShrinks = Shrink.shrink(s.possibilities)
+      opportunityShrinks.map(ops => s.copy(possibilities = ops))
+    }
 
   implicit val arbitraryScenario: Arbitrary[Scenario] = Arbitrary(scenarioGen)
 
