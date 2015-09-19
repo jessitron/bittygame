@@ -33,7 +33,7 @@ trait BittyGameServiceTestiness
       responseAs[Seq[String]]
     }
 
-  private def encode(s: String) = java.net.URLEncoder.encode(s, "UTF-8")
+  def encode(s: String) = java.net.URLEncoder.encode(s, "UTF-8")
 
   def callToTheFirstGameEndpoint(title: ScenarioTitle) =  Get(s"/scenario/${encode(title)}/begin")
 
