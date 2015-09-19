@@ -97,14 +97,14 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
 
   implicit val scenarioShrink =
     Shrink{ s: Scenario =>
-      val opportunityShrinks = Shrink.shrink(s.possibilities)
-      opportunityShrinks.map(ops => s.copy(possibilities = ops))
+      val opportunityShrinks = Shrink.shrink(s.opportunities)
+      opportunityShrinks.map(ops => s.copy(opportunities = ops))
     }
 
   implicit val arbitraryScenario: Arbitrary[Scenario] = Arbitrary(scenarioGen)
 
   def printScenario(g: Scenario) = s"Scenario: \n  Welcome: ${g.welcome}\n" +
-    g.possibilities.map(printOpportunity(_)).map("  " + _).mkString("\n")
+    g.opportunities.map(printOpportunity(_)).map("  " + _).mkString("\n")
 
   implicit def prettyScenario
   (g: Scenario): Pretty = Pretty { p =>

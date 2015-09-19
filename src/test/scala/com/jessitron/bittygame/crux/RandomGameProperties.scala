@@ -15,7 +15,7 @@ object RandomGameProperties extends Properties("Valid games") {
   property("a victory condition exists") =
     Prop.forAll(randomGameGen :| "game def") {
       scenario: Scenario =>
-      scenario.possibilities.exists(_.results.results.contains(Win))
+      scenario.opportunities.exists(_.results.results.contains(Win))
     }
 
   property("It never suggests the empty string at first") =

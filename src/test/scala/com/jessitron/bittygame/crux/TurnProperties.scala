@@ -14,7 +14,7 @@ object TurnProperties extends org.scalacheck.Properties("Taking a turn") with Ga
 
       val win = Opportunity.victory(trigger, message)
 
-      (!someScenario.possibilities.exists(_.conflictsWith(win))) ==> {
+      (!someScenario.opportunities.exists(_.conflictsWith(win))) ==> {
 
         val scenario = someScenario.addPossibility(win)
 

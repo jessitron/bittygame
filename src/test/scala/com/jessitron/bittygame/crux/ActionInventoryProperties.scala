@@ -14,7 +14,7 @@ object ActionInventoryProperties extends Properties("Actions that provide invent
 
       val (scenarioWithoutOpportunity, gameState) = scenarioAndState
 
-      (!scenarioWithoutOpportunity.possibilities.exists(_.conflictsWith(someAction))) ==> {
+      (!scenarioWithoutOpportunity.opportunities.exists(_.conflictsWith(someAction))) ==> {
         val actionProvidingItem = someAction.andProvides(item)
         val scenario = scenarioWithoutOpportunity.addPossibility(actionProvidingItem)
 
@@ -32,7 +32,7 @@ object ActionInventoryProperties extends Properties("Actions that provide invent
 
         val (scenarioWithoutOpportunity, gameState) = scenarioAndState
 
-        (!scenarioWithoutOpportunity.possibilities.exists(_.conflictsWith(someAction))) ==>
+        (!scenarioWithoutOpportunity.opportunities.exists(_.conflictsWith(someAction))) ==>
           (!gameState.hasItem(item)) ==> {
 
             val actionRequiringItem = someAction.onlyIf(Has(item))

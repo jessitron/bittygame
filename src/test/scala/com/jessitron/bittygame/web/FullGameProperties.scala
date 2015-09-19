@@ -35,7 +35,7 @@ class FullGameProperties
 
   val whatINeed: Gen[(Scenario, Seq[String], Seq[String])] = for {
     scenario <- storedScenario
-    validMoves = scenario.possibilities.map(_.trigger) // TODO: that don't exit the game
+    validMoves = scenario.opportunities.map(_.trigger) // TODO: that don't exit the game
     someValidMoves <- Gen.listOf(Gen.oneOf(validMoves))
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario, someValidMoves, someInvalidMoves)
@@ -86,7 +86,7 @@ class FullGameProperties
   }
 
   private def allTriggers(scenario: Scenario): Seq[String] =
-    scenario.possibilities.map(_.trigger)
+    scenario.opportunities.map(_.trigger)
 
   private def iDontKnowHow(thing: ThingThatCanHappen): Boolean =
     thing match {

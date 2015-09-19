@@ -29,7 +29,7 @@ class StartGameTest extends PropSpec with GeneratorDrivenPropertyChecks with Ass
     forAll { scenario : Scenario =>
       forAll(gameStateGen(scenario)) { gameState : GameState =>
         val (_, happenings) = Turn.firstTurn(scenario)
-        val anythingAvailable: Boolean = scenario.possibilities.exists(_.available(gameState))
+        val anythingAvailable: Boolean = scenario.opportunities.exists(_.available(gameState))
         val autoExit: Boolean = happenings.results.contains(ExitGame)
         assert(autoExit == !anythingAvailable,
           s"Should only exit if no options are available. Exiting? $autoExit Available? $anythingAvailable")

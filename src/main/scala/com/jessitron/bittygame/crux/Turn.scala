@@ -29,7 +29,7 @@ object Turn {
   }
 
   private def availableOptions(scenario: Scenario, gameState: GameState): Seq[Opportunity] =
-    scenario.possibilities.filter(_.available(gameState))
+    scenario.opportunities.filter(_.available(gameState))
 
   private def modifyState(previousState: GameState, action: Opportunity): GameState =
     action.results.results.foldLeft(previousState)(modifyStatePerHappening)
