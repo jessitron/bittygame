@@ -48,22 +48,23 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
 
   val alwaysAvailableOpportunity : Gen[Opportunity] = for {
     trigger <- triggerGen
-    whatHappens <- takenOpportunityGen
+    whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen
   } yield  Opportunity(trigger, whatHappens, Seq(), Seq())
 
-  def opportunityGen(itemsInGame: Seq[Item]): Gen[Opportunity] = for {
-    trigger <- triggerGen
-    whatHappens <- takenOpportunityGen
-    obstacles <- obstaclesGen(itemsInGame)
-    conditions <- conditionsGen(itemsInGame)
-  } yield  Opportunity(trigger, whatHappens, conditions, obstacles)
+  def opportunityGen(itemsInGame: Seq[Item]): Gen[Opportunity] =
+    for {
+      trigger <- triggerGen
+      whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen
+      obstacles <- obstaclesGen(itemsInGame)
+      conditions <- conditionsGen(itemsInGame)
+    } yield  Opportunity(trigger, whatHappens, conditions, obstacles)
 
-  val playerActionGen = for {
+  val oneOpportunityGen = for {
     randomItems <- someItems
     opportunity <- opportunityGen(randomItems)
   } yield opportunity
 
-  implicit val arbitraryOpportunity: Arbitrary[Opportunity] = Arbitrary(playerActionGen)
+  implicit val arbitraryOpportunity: Arbitrary[Opportunity] = Arbitrary(oneOpportunityGen)
 
   def printOpportunity(pa: Opportunity) =    s"Type ${pa.trigger} to " + printWhatHappens(pa.results) + "\n  if " + pa.conditions + "\n  unless " + pa.obstacles
 
@@ -75,13 +76,13 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
 
 trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
 
-  val possibilitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(playerActionGen))
+  val opportunitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(oneOpportunityGen))
 
   val welcomeMessageGen: Gen[MessageToThePlayer] = nonEmptyString
 
   val scenarioGen = for {
     title <- scenarioTitleGen
-    possibilities <- possibilitiesGen
+    possibilities <- opportunitiesGen
     welcome <- welcomeMessageGen
   } yield Scenario(title, possibilities, welcome)
 

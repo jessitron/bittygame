@@ -16,7 +16,7 @@ class BittyGameServiceSpec extends org.scalatest.PropSpec
                        with BittyGameServiceTestiness {
 
   property ("the first turn prints the welcome message") {
-    forAll(possibilitiesGen,
+    forAll(opportunitiesGen,
            welcomeMessageGen,
            scenarioTitleGen)
     { (someActions: Seq[Opportunity],

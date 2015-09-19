@@ -31,7 +31,7 @@ trait ThingThatCanHappenGen extends ItemGen {
 
   implicit val arbThing: Arbitrary[ThingThatCanHappen] = Arbitrary(thingGen)
   
-  val takenOpportunityGen = for {
+  val thingsThatHappenWhenYouTakeAnOpportunityGen = for {
     howMany <- Gen.choose(1,6)
     one <- printGen
     two <- winGen
@@ -45,12 +45,12 @@ trait ThingThatCanHappenGen extends ItemGen {
   
   val anythingCouldHappenGen =
     Gen.oneOf(
-      takenOpportunityGen,
+      thingsThatHappenWhenYouTakeAnOpportunityGen,
       dontKnowHowGen.map(WhatHappens.thisHappens),
       cantDoItGen.map(WhatHappens.thisHappens)
     )
 
-  implicit val arbWhatHappens: Arbitrary[WhatHappens] = Arbitrary(takenOpportunityGen)
+  implicit val arbWhatHappens: Arbitrary[WhatHappens] = Arbitrary(thingsThatHappenWhenYouTakeAnOpportunityGen)
 
   def printWhatHappens(wh: WhatHappens) = wh.results.map {
     case Print(str) => s"print '$str'"
