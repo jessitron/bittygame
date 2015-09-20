@@ -28,6 +28,7 @@ class BittyGameServiceActor extends Actor with BittyGameService {
   val gameStates = new TrivialGameStateDAO() // for realz, I'd put this in an actor
 
   scenarioDAO.save(com.jessitron.bittygame.scenarios.Hungover.scenario)
+  scenarioDAO.save(com.jessitron.bittygame.scenarios.JessLife.scenario)
 }
 
 trait BittyGameService extends HttpService {
