@@ -15,7 +15,7 @@ object TurnProperties extends Properties("Taking a turn") with GameStateGen {
 
         val win = Opportunity.victory(trigger, message)
 
-        (!someScenario.opportunities.exists(_.conflictsWith(win))) ==> {
+        noConflict(someScenario, win) ==> {
 
           val scenario = someScenario.addPossibility(win)
 
@@ -23,6 +23,25 @@ object TurnProperties extends Properties("Taking a turn") with GameStateGen {
 
           happenings.results.contains(ExitGame) :| s"the results were ${happenings.results}"
         }
+    }
+
+  def noConflict(scenario: Scenario, opportunity: Opportunity): Boolean =
+    !scenario.opportunities.exists(_.conflictsWith(opportunity))
+
+  property("An opportunity can increase a stat") =
+    forAll(scenarioAndStateGen, alwaysAvailableOpportunity, statGen) {
+      (sas: (Scenario, GameState), opp : Opportunity, stat: Stat) =>
+        val (scenario, state) = sas
+
+      val levelUpOpportunity = alwaysAvailableOpportunity.andIncrease(stat)
+      noConflict(scenario, levelUpOpportunity) ==> {
+        val scenarioWithOpportunity = scenario.addStat(stat).addPossibility(levelUpOpportunity)
+
+        val (newState, happenings) = Turn.act(scenarioWithOpportunity)(stat.name, levelUpOpportunity.trigger)
+
+        newState.statValue(stat.name) = 1 + state.statValue(stat.name)
+        // after seeing a failure, check whether the stat's initial value is its top value
+      }
     }
 
   val neverThinkOfBlank: ((Scenario, GameState)) => Prop = {
