@@ -1,7 +1,7 @@
 package com.jessitron.bittygame.web
 
 import com.jessitron.bittygame.crux._
-import com.jessitron.bittygame.gen.{ScenarioTitleGen, GameStateGen}
+import com.jessitron.bittygame.gen.{ScenarioGen}
 import com.jessitron.bittygame.web.messages.GameResponse
 import com.jessitron.bittygame.web.ports.ScenarioDAO
 import org.scalacheck.{Test, Prop, Gen}
@@ -9,7 +9,7 @@ import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalacheck.Prop.BooleanOperators
 
-trait FullGameGen extends GameStateGen with ScenarioTitleGen {
+trait FullGameGen extends ScenarioGen {
 
   val scenarioDAO : ScenarioDAO
 

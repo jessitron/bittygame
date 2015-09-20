@@ -113,7 +113,7 @@ trait StatGen extends NonEmptyStringGen {
 
 }
 
-trait ScenarioGen extends OpportunityGen with ScenarioTitleGen with StatGen {
+trait ScenarioGen extends OpportunityGen with ScenarioTitleGen with StatGen with GameStateGen {
 
   val opportunitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(oneOpportunityGen))
 
@@ -143,6 +143,23 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen with StatGen {
   (g: Scenario): Pretty = Pretty { p =>
     printScenario(g)
   }
+
+  def gameStateFor(scenario: Scenario) = gameStateGen(scenario.title, scenario.items, scenario.stats)
+
+  def scenarioAndStateGen: Gen[(Scenario, GameState)] =
+    for {
+      scenario <- scenarioGen
+      gameState <- gameStateFor(scenario)
+    } yield (scenario, gameState)
+
+  implicit val arbScenarioAndState: Arbitrary[(Scenario, GameState)] = Arbitrary(scenarioAndStateGen)
+
+  implicit def prettyGameAndState(gameAndState: (Scenario, GameState)): Pretty =
+    Pretty { p =>
+      val (scenario, gameState) = gameAndState
+      val scenarioPretty = implicitly[Scenario => Pretty]
+      s"GameState: $gameState\n" + scenarioPretty(scenario)(p)
+    }
 
 }
 object ScenarioGen extends ScenarioGen

@@ -4,13 +4,13 @@ import org.scalacheck.{Prop, Properties}
 import com.jessitron.bittygame.gen._
 import org.scalacheck.Prop.BooleanOperators
 
-object ActionInventoryProperties extends Properties("Actions that provide inventory") with GameStateGen {
+object ActionInventoryProperties extends Properties("Actions that provide inventory") with ScenarioGen {
 
   property("If I take an opportunity that provides an item, then I have the item") =
     Prop.forAll(
       for {
         scenarioWithoutOpportunity <- scenarioGen
-        gameState <- gameStateGen(scenarioWithoutOpportunity)
+        gameState <- gameStateFor(scenarioWithoutOpportunity)
         opp <- alwaysAvailableOpportunity(scenarioWithoutOpportunity.stats)
         if noConflict(scenarioWithoutOpportunity, opp)
         item <- itemGen

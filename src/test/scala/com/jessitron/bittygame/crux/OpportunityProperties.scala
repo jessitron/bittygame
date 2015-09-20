@@ -1,6 +1,7 @@
 package com.jessitron.bittygame.crux
 
-import org.scalacheck.{Prop, Properties}
+import com.jessitron.bittygame.crux.ActionInventoryProperties._
+import org.scalacheck.{Gen, Prop, Properties}
 import com.jessitron.bittygame.gen._
 import Prop.BooleanOperators
 
@@ -20,7 +21,5 @@ object OpportunityProperties extends Properties("The Opportunity concept") with 
             (opportunityRequiringItem.available(gameStateWithItem) :| "Available with item")
         }
     }
-
-
 
 }

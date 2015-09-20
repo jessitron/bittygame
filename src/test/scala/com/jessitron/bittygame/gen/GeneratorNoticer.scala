@@ -2,7 +2,7 @@ package com.jessitron.bittygame.gen
 
 import org.scalacheck.Gen
 
-object GeneratorNoticer extends GameStateGen {
+object GeneratorNoticer extends ScenarioGen {
 
   def main(args: Array[String]) {
     printAbout("nonemptystring", nonEmptyString, 1000)

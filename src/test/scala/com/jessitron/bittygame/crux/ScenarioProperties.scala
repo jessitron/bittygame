@@ -1,10 +1,10 @@
 package com.jessitron.bittygame.crux
 
-import com.jessitron.bittygame.crux.OpportunityProperties._
-import org.scalacheck.Prop
+import com.jessitron.bittygame.gen.ScenarioGen
+import org.scalacheck.{Properties, Prop}
 import org.scalacheck.Prop.BooleanOperators
 
-object ScenarioProperties {
+object ScenarioProperties extends Properties("What is this even") with ScenarioGen {
 
   property("An item can be an obstacle that prevents an option from being taken successfully, but not from being seen") =
     Prop.forAll(itemGen, messageGen, printActionGen, scenarioAndStateGen) {

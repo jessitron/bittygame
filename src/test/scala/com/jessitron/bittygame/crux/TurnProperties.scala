@@ -6,7 +6,7 @@ import org.scalacheck.Prop.BooleanOperators
 import org.scalatest.{Assertions, PropSpec}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-object TurnProperties extends Properties("Taking a turn") with GameStateGen {
+object TurnProperties extends Properties("Taking a turn") with ScenarioGen {
 
   property("Victory actions result in exit") =
     Prop.forAll(scenarioAndStateGen, triggerGen, messageGen) {
@@ -38,7 +38,7 @@ object TurnProperties extends Properties("Taking a turn") with GameStateGen {
         stat <- statGen
         if noStatConflict(someScenario, stat)
         scenario = someScenario.addStat(stat)
-        state <- gameStateGen(scenario)
+        state <- gameStateFor(scenario)
         opp <- alwaysAvailableOpportunity(scenario.stats)
         if noConflict(scenario, opp)
       } yield (scenario, opp, stat, state)
@@ -74,7 +74,7 @@ object FirstTurnProperties
   extends PropSpec
   with GeneratorDrivenPropertyChecks
   with Assertions
-  with GameStateGen {
+  with ScenarioGen {
   {
     property("The game starts with an empty inventory") {
       forAll { (scenario: Scenario) =>
@@ -96,7 +96,7 @@ object FirstTurnProperties
 
     property("Iff there are no available options, exit on first turn") {
       forAll { scenario: Scenario =>
-        forAll(gameStateGen(scenario)) { gameState: GameState =>
+        forAll(gameStateFor(scenario)) { gameState: GameState =>
           val (_, happenings) = Turn.firstTurn(scenario)
           val anythingAvailable: Boolean = scenario.opportunities.exists(_.available(gameState))
           val autoExit: Boolean = happenings.results.contains(ExitGame)
