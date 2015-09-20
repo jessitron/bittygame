@@ -94,7 +94,6 @@ class FullGameProperties
       case _ => false
     }
 
-
   private def labels(status: Test.Status): Set[String] =
     status match {
       case Test.Failed(_, labels) => labels
@@ -111,5 +110,6 @@ class FullGameProperties
     response.instructions.exists(iDontKnowHow) :| "should say I don't know how"
   }
 
+  // TODO: we never get what the client can't handle
 
 }
