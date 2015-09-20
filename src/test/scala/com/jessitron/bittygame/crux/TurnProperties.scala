@@ -33,13 +33,13 @@ object TurnProperties extends Properties("Taking a turn") with GameStateGen {
       (sas: (Scenario, GameState), opp : Opportunity, stat: Stat) =>
         val (scenario, state) = sas
 
-      val levelUpOpportunity = alwaysAvailableOpportunity.andIncrease(stat)
+      val levelUpOpportunity = opp.andIncrease(stat.name)
       noConflict(scenario, levelUpOpportunity) ==> {
         val scenarioWithOpportunity = scenario.addStat(stat).addPossibility(levelUpOpportunity)
 
-        val (newState, happenings) = Turn.act(scenarioWithOpportunity)(stat.name, levelUpOpportunity.trigger)
+        val (newState, happenings) = Turn.act(scenarioWithOpportunity)(state, levelUpOpportunity.trigger)
 
-        newState.statValue(stat.name) = 1 + state.statValue(stat.name)
+        newState.statValue(stat.name) == 1 + state.statValue(stat.name)
         // after seeing a failure, check whether the stat's initial value is its top value
       }
     }

@@ -6,4 +6,6 @@ package object crux {
    type Trigger = String
 
    type ScenarioTitle = String
+
+   type StatID = String
 }

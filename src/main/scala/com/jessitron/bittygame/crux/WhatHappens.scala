@@ -10,6 +10,7 @@ case object Win extends ThingThatCanHappen
 case class Acquire(item: Item) extends ThingThatCanHappen
 case class IDontKnowHowTo(what: String) extends ThingThatCanHappen
 case class CantDoThat(why: MessageToThePlayer) extends ThingThatCanHappen
+case class IncreaseStat(which: StatID) extends ThingThatCanHappen
 
 object ThingThatCanHappen {
 

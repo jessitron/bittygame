@@ -83,6 +83,18 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
   }
 }
 
+trait StatGen extends NonEmptyStringGen {
+
+  val statValueGen
+
+  val statGen : Gen[Stat] =
+    for {
+      name <- nonEmptyString
+      low <-
+    }
+
+}
+
 trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
 
   val opportunitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(oneOpportunityGen))
