@@ -30,7 +30,7 @@ class FullGameProperties
   extends org.scalatest.PropSpec
   with GeneratorDrivenPropertyChecks
   with ShouldMatchers
-  with BittyGameServiceTestiness
+  with BittyGameServiceInfrastructure
   with FullGameGen {
 
   val whatINeed: Gen[(Scenario, Seq[String], Seq[String])] = for {

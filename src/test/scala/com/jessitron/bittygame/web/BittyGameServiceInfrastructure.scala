@@ -11,7 +11,7 @@ import spray.httpx.SprayJsonSupport._
 import com.jessitron.bittygame.serialization._
 import spray.json.DefaultJsonProtocol._
 
-trait BittyGameServiceTestiness
+trait BittyGameServiceInfrastructure
   extends ScalatestRouteTest
   with Suite
   with BittyGameService {
