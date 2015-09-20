@@ -7,12 +7,15 @@ import org.scalacheck.Prop.BooleanOperators
 object ActionInventoryProperties extends Properties("Actions that provide inventory") with GameStateGen {
 
   property("If I take an opportunity that provides an item, then I have the item") =
-    Prop.forAll(scenarioAndStateGen :| "scenario and state", alwaysAvailableOpportunity :| "The Opportunity", itemGen :| "Item in question") {
-      (scenarioAndState: (Scenario, GameState),
-        someAction: Opportunity,
-        item: Item) =>
-
-      val (scenarioWithoutOpportunity, gameState) = scenarioAndState
+    Prop.forAll(
+      for {
+        scenarioWithoutOpportunity <- scenarioGen
+        gameState <- gameStateGen(scenarioWithoutOpportunity)
+        opp <- alwaysAvailableOpportunity(scenarioWithoutOpportunity.stats)
+        if noConflict(scenarioWithoutOpportunity, opp)
+        item <- itemGen
+      } yield (scenarioWithoutOpportunity, gameState, opp, item)) {
+        case (scenarioWithoutOpportunity, gameState, someAction: Opportunity, item: Item) =>
 
       (!scenarioWithoutOpportunity.opportunities.exists(_.conflictsWith(someAction))) ==> {
         val actionProvidingItem = someAction.andProvides(item)
@@ -23,6 +26,10 @@ object ActionInventoryProperties extends Properties("Actions that provide invent
         nextState.hasItem(item) :| s"Item should be in possession. Happenings: $wh"
       }
     }
+
+  def noConflict(scenario: Scenario, opportunity: Opportunity): Boolean =
+    !scenario.opportunities.exists(_.conflictsWith(opportunity))
+
 
   property("If an opportunity requires an item, it is not available until we have the item") =
     Prop.forAll {

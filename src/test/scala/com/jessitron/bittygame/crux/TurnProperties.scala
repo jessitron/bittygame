@@ -39,7 +39,7 @@ object TurnProperties extends Properties("Taking a turn") with GameStateGen {
         if noStatConflict(someScenario, stat)
         scenario = someScenario.addStat(stat)
         state <- gameStateGen(scenario)
-        opp <- alwaysAvailableOpportunity
+        opp <- alwaysAvailableOpportunity(scenario.stats)
         if noConflict(scenario, opp)
       } yield (scenario, opp, stat, state)
     ) {

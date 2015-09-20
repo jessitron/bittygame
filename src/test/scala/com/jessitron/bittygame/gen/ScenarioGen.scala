@@ -45,22 +45,24 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
     some <- Gen.listOfN(howMany, obstacleGen(itemsInGame))
   } yield some
 
-  val alwaysAvailableOpportunity : Gen[Opportunity] = for {
+  def alwaysAvailableOpportunity(statsInGame: Seq[Stat]) : Gen[Opportunity] = for {
     trigger <- triggerGen
-    whatHappens <- someItems.flatMap(thingsThatHappenWhenYouTakeAnOpportunityGen(_))
+    items <- someItemsGen
+    whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen(items, statsInGame)
   } yield  Opportunity(trigger, whatHappens, Seq(), Seq())
 
-  def opportunityGen(itemsInGame: Seq[Item]): Gen[Opportunity] =
+  def opportunityGen(itemsInGame: Seq[Item], statsInGame: Seq[Stat]): Gen[Opportunity] =
     for {
       trigger <- triggerGen
-      whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame)
+      whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame, statsInGame)
       obstacles <- obstaclesGen(itemsInGame)
       conditions <- conditionsGen(itemsInGame)
     } yield  Opportunity(trigger, whatHappens, conditions, obstacles)
 
   val oneOpportunityGen = for {
-    randomItems <- someItems
-    opportunity <- opportunityGen(randomItems)
+    randomItems <- someItemsGen
+    randomStats <- someStatsGen
+    opportunity <- opportunityGen(randomItems, randomStats)
   } yield opportunity
 
   implicit val oneOpportunityShrink: Shrink[Opportunity] = Shrink {

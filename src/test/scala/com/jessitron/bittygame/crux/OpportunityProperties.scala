@@ -7,7 +7,7 @@ import Prop.BooleanOperators
 object OpportunityProperties extends Properties("The Opportunity concept") with GameStateGen {
 
   property("If it requires an object, it is not available until that object is in state") =
-    Prop.forAll(alwaysAvailableOpportunity, itemGen, independentGameStateGen) {
+    Prop.forAll(alwaysAvailableOpportunity(Seq()), itemGen, independentGameStateGen) {
       (opportunity: Opportunity,
        item: Item,
        gameState: GameState) =>

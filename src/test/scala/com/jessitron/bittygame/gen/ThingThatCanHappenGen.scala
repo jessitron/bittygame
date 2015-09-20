@@ -7,7 +7,7 @@ import org.scalacheck.util.Pretty
 import org.scalacheck.{Shrink, Gen, Arbitrary}
 import scala.util.Random.shuffle
 
-trait ThingThatCanHappenGen extends ItemGen {
+trait ThingThatCanHappenGen extends ItemGen with StatGen {
 
   val printGen = nonEmptyString.map(Print(_))
 
@@ -35,13 +35,14 @@ trait ThingThatCanHappenGen extends ItemGen {
     itemsToAcquire <- Gen.listOfN(howManyItems, acquireAnItem)
   } yield itemsToAcquire
   
-  def thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame: Seq[Item]): Gen[WhatHappens] =
+  def thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame: Seq[Item], statsInGame: Seq[Stat]): Gen[WhatHappens] =
     for {
       howMany <- Gen.choose(1,6)
       one <- printGen
       two <- winGen
       three <- exitGen
       more <- acquireSomeOf(howMany, itemsInGame)
+      increases <- Gen.someOf(howMany, statsInGame.map(st => IncreaseStat(st.name)))
     } yield {
       val stuff = shuffle(Seq(one,two,three) ++ more).take(howMany)
       WhatHappens(stuff)
@@ -54,15 +55,14 @@ trait ThingThatCanHappenGen extends ItemGen {
   
   val anythingCouldHappenGen =
     for {
-      aListOfItems <- someItems
+      aListOfItems <- someItemsGen
+      aListOfStats <- someStatsGen
       something <- Gen.oneOf(
-        thingsThatHappenWhenYouTakeAnOpportunityGen(aListOfItems),
+        thingsThatHappenWhenYouTakeAnOpportunityGen(aListOfItems, aListOfStats),
         dontKnowHowGen.map(WhatHappens.thisHappens),
         cantDoItGen.map(WhatHappens.thisHappens)
       )
     } yield something
-
-  implicit val arbWhatHappens: Arbitrary[WhatHappens] = Arbitrary(someItems.flatMap(thingsThatHappenWhenYouTakeAnOpportunityGen))
 
   def printWhatHappens(wh: WhatHappens) = wh.results.map {
     case Print(str) => s"print '$str'"

@@ -7,7 +7,7 @@ object GeneratorNoticer extends GameStateGen {
   def main(args: Array[String]) {
     printAbout("nonemptystring", nonEmptyString, 1000)
     printAbout("item", itemGen, 1000)
-    printAbout("list of items", someItems)
+    printAbout("list of items", someItemsGen)
     printAbout("playerAction", oneOpportunityGen, 1000)
     printAbout("possibilities", opportunitiesGen)
     printAbout("welcome", welcomeMessageGen, 1000)
