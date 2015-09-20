@@ -49,7 +49,9 @@ object TurnProperties extends Properties("Taking a turn") with GameStateGen {
 
         val (newState, happenings) = Turn.act(scenarioWithOpportunity)(state, levelUpOpportunity.trigger)
 
-        newState.statValue(stat.name) == 1 + state.statValue(stat.name)
+        val newValue = newState.statValue(stat.name)
+        val oldValue = state.statValue(stat.name)
+        ((newValue == 1 + oldValue) || (newValue == stat.high)) :| s"Poo. $newValue should be or more than $oldValue or else ${stat.high}"
         // after seeing a failure, check whether the stat's initial value is its top value
       }
 
