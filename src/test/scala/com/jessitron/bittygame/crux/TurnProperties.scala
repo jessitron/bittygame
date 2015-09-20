@@ -28,21 +28,31 @@ object TurnProperties extends Properties("Taking a turn") with GameStateGen {
   def noConflict(scenario: Scenario, opportunity: Opportunity): Boolean =
     !scenario.opportunities.exists(_.conflictsWith(opportunity))
 
-  property("An opportunity can increase a stat") =
-    forAll(scenarioAndStateGen, alwaysAvailableOpportunity, statGen) {
-      (sas: (Scenario, GameState), opp : Opportunity, stat: Stat) =>
-        val (scenario, state) = sas
+ def noStatConflict(scenario: Scenario, stat: Stat): Boolean =
+    !scenario.stats.exists(_.conflictsWith(stat))
 
-      val levelUpOpportunity = opp.andIncrease(stat.name)
-      noConflict(scenario, levelUpOpportunity) ==> {
-        val scenarioWithOpportunity = scenario.addStat(stat).addPossibility(levelUpOpportunity)
+  property("An opportunity can increase a stat") =
+    Prop.forAll(
+      for {
+        someScenario <- scenarioGen
+        stat <- statGen
+        if noStatConflict(someScenario, stat)
+        scenario = someScenario.addStat(stat)
+        state <- gameStateGen(scenario)
+        opp <- alwaysAvailableOpportunity
+        if noConflict(scenario, opp)
+      } yield (scenario, opp, stat, state)
+    ) {
+      case (scenario: Scenario, opp : Opportunity, stat: Stat, state: GameState) =>
+        val levelUpOpportunity = opp.andIncrease(stat.name)
+        val scenarioWithOpportunity = scenario.addPossibility(levelUpOpportunity)
 
         val (newState, happenings) = Turn.act(scenarioWithOpportunity)(state, levelUpOpportunity.trigger)
 
         newState.statValue(stat.name) == 1 + state.statValue(stat.name)
         // after seeing a failure, check whether the stat's initial value is its top value
       }
-    }
+
 
   val neverThinkOfBlank: ((Scenario, GameState)) => Prop = {
     case (scenario, gameState) =>

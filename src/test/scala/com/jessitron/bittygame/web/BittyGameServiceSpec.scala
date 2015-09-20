@@ -17,22 +17,19 @@ class BittyGameServiceSpec extends org.scalatest.PropSpec
                        with ScenarioGen {
 
   property ("the first turn prints the welcome message") {
-    forAll(opportunitiesGen,
-           welcomeMessageGen,
-           scenarioTitleGen)
-    { (someActions: Seq[Opportunity],
-       message: MessageToThePlayer,
-        title: ScenarioTitle) =>
+    forAll
+    { (someScenario: Scenario,
+       message: MessageToThePlayer) =>
 
-      whenever (title.nonEmpty && message.nonEmpty) {
+      whenever (message.nonEmpty) {
 
-        val someGame = Scenario(title, someActions, message)
+        val scenario = someScenario.copy(welcome = message)
 
-        Put("/scenario/", someGame) ~> myRoute ~> check {
+        Put("/scenario/", scenario) ~> myRoute ~> check {
           status should be(Created)
         }
 
-        Get("/scenario/" + encode(title) + "/begin") ~> myRoute ~> check {
+        Get("/scenario/" + encode(scenario.title) + "/begin") ~> myRoute ~> check {
           responseAs[GameResponse].instructions should contain(Print(message))
         }
 

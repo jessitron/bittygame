@@ -43,6 +43,6 @@ object Hungover {
 
   val magicWin = Opportunity.victory("strangeloop", "You said the magic word!")
 
-  val scenario: Scenario = Scenario("Hungover", Seq(lookAroundBedroom, magicWin), welcome)
+  val scenario: Scenario = Scenario("Hungover", Seq(lookAroundBedroom, magicWin), welcome, Seq())
 
 }

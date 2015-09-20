@@ -59,9 +59,10 @@ package object serialization {
   implicit val itemFormat: RootJsonFormat[Item] = jsonFormat1(Item.apply)
   implicit val whatHappensWriter: RootJsonFormat[WhatHappens] = jsonFormat1(WhatHappens.apply)
   implicit val obstacleWriter: JsonFormat[Obstacle] = jsonFormat2(Obstacle.apply)
+  implicit val statWriter: JsonFormat[Stat] = jsonFormat4(Stat.apply)
 
   implicit val playerActionFormat: RootJsonFormat[Opportunity] = jsonFormat4(Opportunity.apply)
-  implicit val scenarioFormat: RootJsonFormat[Scenario] = jsonFormat3(Scenario.apply)
+  implicit val scenarioFormat: RootJsonFormat[Scenario] = jsonFormat4(Scenario.apply)
 
-  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat2(GameState.apply)
+  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat3(GameState.apply)
 }

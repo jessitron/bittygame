@@ -85,17 +85,33 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
 
 trait StatGen extends NonEmptyStringGen {
 
-  val statValueGen
+  val minStatLow = -10
+  val maxStatHigh = 10
 
   val statGen : Gen[Stat] =
     for {
       name <- nonEmptyString
-      low <-
-    }
+      low <- Gen.choose(minStatLow, maxStatHigh)
+      high <- Gen.choose(low, maxStatHigh)
+      start <- Gen.choose(low, high)
+    } yield Stat(name, low, high, start)
+
+  val someStatsGen: Gen[Seq[Stat]] =
+  for {
+    n <- Gen.choose(0,4)
+    stats <- Gen.listOfN(n, statGen)
+  } yield stats
+
+  import scala.collection.JavaConversions._ // why on Earth does Gen.sequence use java.util.ArrayList? sigh
+  /* choose cromulent starting values for a slew of stats */
+  def startingValuesGen(stats: Seq[Stat]) : Gen[Seq[(StatID, Int)]] =
+    Gen.sequence (stats.map { stat =>
+      Gen.choose(stat.low, stat.high).map ((stat.name, _))
+    }).map(_.toSeq)
 
 }
 
-trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
+trait ScenarioGen extends OpportunityGen with ScenarioTitleGen with StatGen {
 
   val opportunitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(oneOpportunityGen))
 
@@ -105,7 +121,8 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
     title <- scenarioTitleGen
     possibilities <- opportunitiesGen
     welcome <- welcomeMessageGen
-  } yield Scenario(title, possibilities, welcome)
+    stats <- someStatsGen
+  } yield Scenario(title, possibilities, welcome, stats)
 
   implicit val scenarioShrink =
     Shrink{ s: Scenario =>
@@ -115,8 +132,10 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen{
 
   implicit val arbitraryScenario: Arbitrary[Scenario] = Arbitrary(scenarioGen)
 
-  def printScenario(g: Scenario) = s"Scenario: \n  Welcome: ${g.welcome}\n" +
-    g.opportunities.map(printOpportunity(_)).map("  " + _).mkString("\n")
+  def printScenario(g: Scenario) =
+    s"Scenario: \n  Welcome: ${g.welcome}\n" +
+    g.opportunities.map(printOpportunity).map("  " + _).mkString("\n") +
+    s"\n  Stats: ${g.stats}"
 
   implicit def prettyScenario
   (g: Scenario): Pretty = Pretty { p =>

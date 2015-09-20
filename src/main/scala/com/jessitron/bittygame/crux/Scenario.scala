@@ -44,6 +44,22 @@ case class Scenario(title: ScenarioTitle,
     assert(!stats.map(_.name).contains(s.name), "Conflict with existing stat: " + s.name)
     copy(stats = stats :+ s)
   }
+
+  def items: Seq[Item] = {
+    // consider making this separately declared
+    val allTheThingsThatCanHappen =
+      for {
+        opp <- opportunities
+        res <- opp.results.results
+      } yield res
+
+    allTheThingsThatCanHappen.collect { case Acquire(item) => item }
+  }
+
+  override def toString =
+    s"Scenario: \n  Welcome: ${this.welcome}\n" +
+      this.opportunities.map(_.toString).map("  " + _).mkString("\n") +
+      s"\n  Stats: ${this.stats}\n"
 }
 
 

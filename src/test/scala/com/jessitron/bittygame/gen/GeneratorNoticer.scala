@@ -12,6 +12,7 @@ object GeneratorNoticer extends GameStateGen {
     printAbout("possibilities", opportunitiesGen)
     printAbout("welcome", welcomeMessageGen, 1000)
     printAbout("scenario", scenarioGen)
+    printAbout("stats", statGen)
     printAbout("scenarioAndState", scenarioAndStateGen)
   }
 

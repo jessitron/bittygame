@@ -11,15 +11,18 @@ object JessLife {
   private val partTimeJob = Item("part-time menial job")
   private val loveOfProgramming = Item("love of programming")
 
+  // Stats
+  private val grades = Stat("grades", 0, 4, 2)
+
   // Opportunities
   private val pleaseTheTeachers = Opportunity.printing("do all your homework",
-    "Your teachers love you.") // TODO: raise grades
+    "Your teachers love you.").andIncrease(grades.name)
 
   private val drinking = Opportunity.printing("get drunk a lot",
     "All the other kids are doing it. Now you have people to hang out with.") // TODO: lower grades
 
   private val takeTest = Opportunity.printing("take standardized tests",
-    "You got a great score! Now you'll have scholarships") // TODO: raise grades
+    "You got a great score! Now you'll have scholarships").andIncrease(grades.name)
 
   private val goToCollege = Opportunity.printing("go to college",
     "They're so impressed with you, you get a full ride to study Physics").
@@ -49,5 +52,5 @@ object JessLife {
   val scenario = Scenario("jesslife",
     Seq(gradSchool, amdocs, computerInternship, payForCollege, goToCollege,
         takeTest, drinking, pleaseTheTeachers),
-    welcome)
+    welcome, Seq(grades))
 }

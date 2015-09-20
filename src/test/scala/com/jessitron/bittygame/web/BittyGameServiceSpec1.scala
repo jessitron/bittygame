@@ -17,7 +17,7 @@ with BittyGameServiceInfrastructure {
 
     it("prints the welcome message") {
 
-      val someScenario = Scenario("yoto", Seq(), "Why hello there")
+      val someScenario = Scenario("yoto", Seq(), "Why hello there", Seq())
       Put("/scenario/", someScenario) ~> myRoute ~> check {
         status should be(Created)
       }

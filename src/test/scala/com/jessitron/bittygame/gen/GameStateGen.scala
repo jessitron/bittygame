@@ -4,15 +4,23 @@ import com.jessitron.bittygame.crux.{GameState, Scenario}
 import org.scalacheck.util.Pretty
 import org.scalacheck.{Arbitrary, Gen}
 
-trait GameStateGen extends ScenarioGen with ItemGen {
+trait GameStateGen extends ScenarioGen with ItemGen with StatGen {
 
-  def gameStateGen(scenario: Scenario): Gen[GameState] = GameState.init(scenario.title) // TODO: use the items in the game
-
-  val independentGameStateGen : Gen[GameState] =
+  def gameStateGen(scenario: Scenario): Gen[GameState] =
     for {
-      itemCount <- Gen.choose(0,4)
-      items <- Gen.listOfN(itemCount, itemGen)
-    } yield GameState("Some game or other", items)
+      items <- Gen.someOf(scenario.items)
+      statValuePairs <- startingValuesGen(scenario.stats)
+    } yield GameState(scenario.title, items, Map(statValuePairs:_*))
+
+
+    val independentGameStateGen : Gen[GameState] =
+      for {
+        itemCount <- Gen.choose(0,4)
+        items <- Gen.listOfN(itemCount, itemGen)
+        someStats <- someStatsGen
+        statValues <- startingValuesGen(someStats)
+      } yield GameState("Some game or other", items, Map(statValues:_*) )
+
 
   def scenarioAndStateGen: Gen[(Scenario, GameState)] =
     for {
