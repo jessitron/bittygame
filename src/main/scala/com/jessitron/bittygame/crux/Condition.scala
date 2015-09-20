@@ -13,4 +13,3 @@ object Condition {
       case _ => false
     }
 }
-gs
