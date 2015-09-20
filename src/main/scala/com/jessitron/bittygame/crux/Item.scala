@@ -1,3 +1,3 @@
 package com.jessitron.bittygame.crux
 
-case class Item(displayName: String)
+case class Item(name: String)
