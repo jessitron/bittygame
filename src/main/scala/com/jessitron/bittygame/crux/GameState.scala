@@ -15,6 +15,6 @@ case class GameState(title: ScenarioTitle, inventory: Seq[Item], stats : Map[Sta
 }
 
 object GameState {
-  // TODO: property -- all stats start at their starting value
-  def init(scenarioKey: ScenarioTitle, stats: Seq[Stat]): GameState = GameState(scenarioKey, Seq(), Map())
+  def init(scenarioKey: ScenarioTitle, stats: Seq[Stat]): GameState =
+    GameState(scenarioKey, Seq(), Map(stats.map{s => s.name -> s.starting } :_*))
 }
