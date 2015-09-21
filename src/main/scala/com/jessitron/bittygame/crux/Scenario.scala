@@ -57,7 +57,7 @@ case class Scenario(title: ScenarioTitle,
   }
 
   override def toString =
-    s"Scenario: \n  Welcome: ${this.welcome}\n" +
+    s"Scenario: $title\n  Welcome: ${this.welcome}\n" +
       this.opportunities.map(_.toString).map("  " + _).mkString("\n") +
       s"\n  Stats: ${this.stats}\n"
 }

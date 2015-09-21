@@ -5,19 +5,41 @@ import org.scalacheck.{Shrink, Arbitrary, Gen}
 import org.scalacheck.util.Pretty
 import Math.min
 
-trait ActionConditionGen {
+trait ConditionGen {
 
-  def conditionGen(itemsInGame: Seq[Item]) = for {
+  def itemInTheWayGen(itemsInGame: Seq[Item]) = for {
     itemToGetInTheWay <- Gen.oneOf(itemsInGame)
   } yield Has(itemToGetInTheWay)
 
-  def conditionsGen(itemsInGame: Seq[Item]) = for {
-    howMany <- Gen.choose(0,min(2, itemsInGame.length))
-    some <- Gen.listOfN(howMany, conditionGen(itemsInGame))
-  } yield some
+  def mustHaveAStatGen(stat: Stat) =
+    for {
+      level <- Gen.choose(stat.low + 1, stat.high)
+    } yield MustBeHighEnough(stat.name, level)
+
+  def bigMustHaveGen(stats:Seq[Stat]) =
+    for{
+    stat <- Gen.oneOf(stats)
+      gen <- mustHaveAStatGen(stat)
+    } yield gen
+
+  def conditionGen(itemsInGame: Seq[Item], statsInGame: Seq[Stat]) : Gen[Condition] ={
+    val gens:Seq[Gen[Condition]] = (if(itemsInGame.nonEmpty) Seq(itemInTheWayGen(itemsInGame)) else Nil) ++
+                (if(statsInGame.nonEmpty) Seq(bigMustHaveGen(statsInGame)) else Nil)
+    if(gens.isEmpty) Gen.fail else
+    if(gens.size == 1) gens.head else
+    if(gens.size == 2) Gen.oneOf(gens.head,gens.tail.head) else
+     Gen.oneOf(gens.head,gens.tail.head,gens.tail.tail :_*)
+  }
+
+  import scala.collection.JavaConversions._ // OMFG
+  def conditionsGen(itemsInGame: Seq[Item], statsInGame: Seq[Stat]) : Gen[Seq[Condition]] = for {
+    itemLimits <- Gen.someOf(itemsInGame.map(Has(_)))
+    statThingers: Seq[MustBeHighEnough] <- Gen.sequence(statsInGame.map(mustHaveAStatGen)).map(_.toSeq)
+    statHighEnough <- Gen.someOf(statThingers)
+  } yield itemLimits ++ statHighEnough
 }
 
-trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionConditionGen with NonEmptyStringGen {
+trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ConditionGen with NonEmptyStringGen {
 
   val triggerGen: Gen[Trigger] = nonEmptyString
 
@@ -34,15 +56,15 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
     message <- messageGen
   } yield Opportunity.printing(trigger, message)
 
-  def obstacleGen(itemsInGame: Seq[Item]) = for {
+  def obstacleGen(itemsInGame: Seq[Item], statsInGame: Seq[Stat]) = for {
     sadMessage <- messageGen
-    condition <- conditionGen(itemsInGame)
+    condition <- conditionGen(itemsInGame, statsInGame)
   } yield Obstacle(condition, sadMessage)
 
   // question: what happens for an empty list of items?
-  def obstaclesGen(itemsInGame: Seq[Item]) = for {
+  def obstaclesGen(itemsInGame: Seq[Item],statsInGame: Seq[Stat]) = for {
     howMany <- Gen.choose(0,min(2, itemsInGame.length))
-    some <- Gen.listOfN(howMany, obstacleGen(itemsInGame))
+    some <- Gen.listOfN(howMany, obstacleGen(itemsInGame,statsInGame))
   } yield some
 
   def alwaysAvailableOpportunity(statsInGame: Seq[Stat]) : Gen[Opportunity] = for {
@@ -55,8 +77,8 @@ trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ActionCondi
     for {
       trigger <- triggerGen
       whatHappens <- thingsThatHappenWhenYouTakeAnOpportunityGen(itemsInGame, statsInGame)
-      obstacles <- obstaclesGen(itemsInGame)
-      conditions <- conditionsGen(itemsInGame)
+      obstacles <- obstaclesGen(itemsInGame,statsInGame)
+      conditions <- conditionsGen(itemsInGame,statsInGame)
     } yield  Opportunity(trigger, whatHappens, conditions, obstacles)
 
   val oneOpportunityGen = for {
@@ -115,15 +137,15 @@ trait StatGen extends NonEmptyStringGen {
 
 trait ScenarioGen extends OpportunityGen with ScenarioTitleGen with StatGen with GameStateGen {
 
-  val opportunitiesGen: Gen[Seq[Opportunity]] = Gen.resize(10,Gen.listOf(oneOpportunityGen))
-
   val welcomeMessageGen: Gen[MessageToThePlayer] = nonEmptyString
 
   val scenarioGen: Gen[Scenario] = for {
     title <- scenarioTitleGen
-    possibilities <- opportunitiesGen
     welcome <- welcomeMessageGen
     stats <- someStatsGen
+    items <- someItemsGen
+    howManyOpportunities <- Gen.choose(2, 12)
+    possibilities <- Gen.listOfN(howManyOpportunities, opportunityGen(items,stats))
   } yield Scenario(title, possibilities, welcome, stats)
 
   implicit val scenarioShrink =

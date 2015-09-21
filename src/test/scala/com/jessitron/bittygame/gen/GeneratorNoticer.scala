@@ -9,7 +9,6 @@ object GeneratorNoticer extends ScenarioGen {
     printAbout("item", itemGen, 1000)
     printAbout("list of items", someItemsGen)
     printAbout("playerAction", oneOpportunityGen, 1000)
-    printAbout("possibilities", opportunitiesGen)
     printAbout("welcome", welcomeMessageGen, 1000)
     printAbout("scenario", scenarioGen)
     printAbout("stats", statGen)

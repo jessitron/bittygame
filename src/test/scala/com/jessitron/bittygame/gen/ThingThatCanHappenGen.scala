@@ -71,6 +71,7 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
     case Acquire(item) => s"Get $item"
     case CantDoThat(s) => s"Can't do that because $s"
     case IDontKnowHowTo(s) => s"Unknown option: $s"
+    case IncreaseStat(s) => s"Level up: $s"
   }.mkString("\n      and ")
 
   implicit def prettyWhatHappens(wh: WhatHappens):Pretty = Pretty { p =>

@@ -29,8 +29,6 @@ object WhatIsAShrinker extends ScenarioGen {
 
     printTheShrinks(scenarioTitleGen, "title")(nonEmptyShrinker)
 
-    printTheShrinks(opportunitiesGen, "opportunities")
-
     printTheShrinks(oneOpportunityGen, "one opportunity")(oneOpportunityShrink)
 
   }

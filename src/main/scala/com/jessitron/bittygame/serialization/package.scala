@@ -10,6 +10,7 @@ package object serialization {
     override def write(obj: Condition): JsValue = {
       val fields = obj match {
         case Has(item) => Map("type" -> JsString("has"), "item" -> itemFormat.write(item))
+        case x:MustBeHighEnough => val base = mustBeFormat.write(x).asJsObject; base.fields + ("type" -> JsString("YouCanDotheThing"))
       }
       fields.toJson
     }
@@ -21,9 +22,12 @@ package object serialization {
       val mappy = json.asInstanceOf[JsObject].fields
       mappy.getOrElse("type", fail("no type", json)) match {
         case JsString("has") => Has(itemFormat.read(mappy.getOrElse("item", fail("Has needs item", json))))
+        case JsString("YouCanDotheThing") => mustBeFormat.read(json)
         case _ => throw new RuntimeException("I don't know how to deserialize this condition: " + json.prettyPrint)
       }
     }
+
+    def mustBeFormat = jsonFormat2(MustBeHighEnough)
   }
 
   implicit def thingThatCanHappenWriter(implicit itemFormat: JsonFormat[Item]): JsonFormat[ThingThatCanHappen] = new JsonFormat[ThingThatCanHappen] {
@@ -36,6 +40,7 @@ package object serialization {
         case Acquire(it)  => Map("type" -> JsString("acquire"), "item" -> itemFormat.write(it))
         case IDontKnowHowTo(s) => Map("type" -> "unknown", "what" -> s).mapValues(JsString(_))
         case CantDoThat(s) => Map("type" -> "denied", "why" -> s).mapValues(JsString(_))
+        case IncreaseStat(id) =>  Map("type" -> "increase", "stat" -> id).mapValues(JsString(_))
       }
       fields.toJson
     }
@@ -52,6 +57,7 @@ package object serialization {
         case "print" => Print(mappy.getOrElse("message", fail("print needs message", json)).asInstanceOf[JsString].value)
         case "unknown" => IDontKnowHowTo(mappy.getOrElse("what", fail("unknown needs what", json)).asInstanceOf[JsString].value)
         case "denied"  => CantDoThat(mappy.getOrElse("why", fail("denied needs why", json)).asInstanceOf[JsString].value)
+        case "increase" => IncreaseStat(mappy.getOrElse("stat", fail("increase needs stat", json)).asInstanceOf[JsString].value)
       }
     }
   }

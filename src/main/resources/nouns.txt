@@ -13,3 +13,5 @@ dog
 teacher
 Rich Hickey's hair
 the pit
+the head of Martin Odersky
+Alonzo Church's skull
