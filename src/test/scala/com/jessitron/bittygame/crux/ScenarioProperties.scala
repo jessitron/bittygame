@@ -14,19 +14,21 @@ object ScenarioProperties extends Properties("What is this even") with ScenarioG
        sas: (Scenario, GameState)) =>
 
         val (s, stateWithoutItem) = sas
-        val trigger = someOpportunity.trigger
-        val blockedOpportunity =
-          someOpportunity.behindObstacle(Has(obstructingItem), disappointment)
+        noConflict(s, someOpportunity) ==> {
 
-        val scenario = s.addPossibility(blockedOpportunity)
+          val trigger = someOpportunity.trigger
+          val blockedOpportunity =
+            someOpportunity.behindObstacle(Has(obstructingItem), disappointment)
 
-        val stateWithItem = stateWithoutItem.addToInventory(obstructingItem)
+          val scenario = s.addPossibility(blockedOpportunity)
 
-        val (_, obstructedHappenings) = Turn.act(scenario)(stateWithItem, trigger)
-        val (_, unobstructedHappenings) = Turn.act(scenario)(stateWithoutItem, trigger)
+          val stateWithItem = stateWithoutItem.addToInventory(obstructingItem)
 
-        ((obstructedHappenings.results.toSet == Set(CantDoThat(disappointment))) :| "Denied!!") &&
-          ((unobstructedHappenings == someOpportunity.results) :| "Without obstacle, OK")
+          val (_, obstructedHappenings) = Turn.act(scenario)(stateWithItem, trigger)
+          val (_, unobstructedHappenings) = Turn.act(scenario)(stateWithoutItem, trigger)
 
+          ((obstructedHappenings.results.toSet == Set(CantDoThat(disappointment))) :| "Denied!!") &&
+            ((unobstructedHappenings == someOpportunity.results) :| "Without obstacle, OK")
+        }
     }
 }

@@ -27,5 +27,5 @@ trait ItemGen extends NonEmptyStringGen {
 
   implicit val arbItem: Arbitrary[Item] = Arbitrary(itemGen)
 
-  val someItemsGen: Gen[Seq[Item]] = Gen.resize(10, Gen.listOf(itemGen))
+  val someItemsGen: Gen[Seq[Item]] = Gen.resize(10, Gen.listOf(itemGen)).map(_.distinct)
 }

@@ -25,9 +25,6 @@ object TurnProperties extends Properties("Taking a turn") with ScenarioGen {
         }
     }
 
-  def noConflict(scenario: Scenario, opportunity: Opportunity): Boolean =
-    !scenario.opportunities.exists(_.conflictsWith(opportunity))
-
  def noStatConflict(scenario: Scenario, stat: Stat): Boolean =
     !scenario.stats.exists(_.conflictsWith(stat))
 

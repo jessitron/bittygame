@@ -148,6 +148,11 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen with StatGen with
     possibilities <- Gen.listOfN(howManyOpportunities, opportunityGen(items,stats))
   } yield Scenario(title, possibilities, welcome, stats)
 
+
+  def noConflict(scenario: Scenario, opportunity: Opportunity): Boolean =
+    !scenario.opportunities.exists(_.conflictsWith(opportunity))
+
+
   implicit val scenarioShrink =
     Shrink{ s: Scenario =>
       val opportunityShrinks = Shrink.shrink(s.opportunities)

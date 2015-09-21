@@ -28,10 +28,6 @@ object ActionInventoryProperties extends Properties("Actions that provide invent
         }
     }
 
-  def noConflict(scenario: Scenario, opportunity: Opportunity): Boolean =
-    !scenario.opportunities.exists(_.conflictsWith(opportunity))
-
-
   property("If an opportunity requires an item, it is not available until we have the item") =
     Prop.forAll(whatINeed) {
       case (scenarioWithoutOpportunity, gameState, someAction: Opportunity, item) =>
