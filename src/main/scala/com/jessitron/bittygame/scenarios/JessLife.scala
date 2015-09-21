@@ -26,12 +26,14 @@ object JessLife {
 
   private val goToCollege = Opportunity.printing("go to college",
     "They're so impressed with you, you get a full ride to study Physics").
-    andProvides(collegeEnrollment) // TODO: only if grades are good enough
+    andProvides(collegeEnrollment).
+    onlyIf(MustBeHighEnough(grades.name, 4))
 
   private val payForCollege = Opportunity.printing("pay for college",
     "You get a part-time job so you won't have too much debt.").
     andProvides(partTimeJob).
-    andProvides(collegeEnrollment) // TODO: only if grades not bad
+    andProvides(collegeEnrollment).
+    behindObstacle(MustBeHighEnough(grades.name, 2), "Your grades are too bad.")
 
   private val computerInternship = Opportunity.printing("take a summer internship",
     "You stay with your aunt and work as a programmer for the summer. Fun!").

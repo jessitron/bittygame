@@ -79,7 +79,7 @@ class FullGameProperties
           canDoAllTheThingsWeCanThink && cannotDoThingsWeDidntThinkOf)
 
       /* Step 5: give Scalatest its exception if the properties don't hold */
-      assert(propertyResult.passed, s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}")
+      assert(propertyResult.passed, s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}\n Thought of: $thoughts")
 
     }
 
