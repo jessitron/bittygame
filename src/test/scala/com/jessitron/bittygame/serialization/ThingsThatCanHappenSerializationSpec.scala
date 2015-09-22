@@ -15,7 +15,8 @@ class ThingsThatCanHappenSerializationSpec
   property("Round trip") {
     forAll { thing: ThingThatCanHappen =>
       val serialized: String = thing.toJson.compactPrint
-      assert(thing === serialized.parseJson.convertTo[ThingThatCanHappen], s"Not successfully parsed: $serialized")
+      val deserialized = serialized.parseJson.convertTo[ThingThatCanHappen]
+      assert(thing === deserialized, s"Not successfully parsed: $serialized")
     }
   }
 

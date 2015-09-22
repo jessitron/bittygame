@@ -12,10 +12,6 @@ case class IDontKnowHowTo(what: String) extends ThingThatCanHappen
 case class CantDoThat(why: MessageToThePlayer) extends ThingThatCanHappen
 case class IncreaseStat(which: StatID) extends ThingThatCanHappen
 
-object ThingThatCanHappen {
-
-}
-
 case class WhatHappens(results: Seq[ThingThatCanHappen]) {
   def andMaybe(mightHappen: Option[ThingThatCanHappen]): WhatHappens =
     mightHappen match {
