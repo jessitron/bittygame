@@ -36,7 +36,7 @@ class FullGameProperties
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { case (scenario, someValidMoves, someInvalidMoves) =>
       val title = scenario.title
-      val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
+      val moves = (someValidMoves ++ someInvalidMoves)
 
       /* Step 0: store the scenario */
       create(scenario)
@@ -51,12 +51,6 @@ class FullGameProperties
       val thoughts = callThink(gameID)
 
       /* Step 4: check the state of the output data in the world */
-      
-      def isRecognized(thought: String) : Prop = isRecognizedResponse(callTakeTurn(gameID, thought)) :| s"Not recognized: <$thought>"
-      val canDoAllTheThingsWeCanThink: Prop =
-        Prop.all(
-          thoughts.map(isRecognized)
-          : _*)
 
       val unthought =
         allTriggers(scenario).                 // everything in the game
@@ -66,6 +60,12 @@ class FullGameProperties
       val cannotDoThingsWeDidntThinkOf =
         Prop.all(
           unthought.map(notRecognized)
+            : _*)
+
+      def isRecognized(thought: String) : Prop = isRecognizedResponse(callTakeTurn(gameID, thought)) :| s"Not recognized: <$thought>"
+      val canDoAllTheThingsWeCanThink: Prop =
+        Prop.all(
+          thoughts.take(1).map(isRecognized)
             : _*)
 
       // using ScalaCheck to accumulate ACTUAL DATA about the failure. Could have used Scalatest 'withClue' instead
