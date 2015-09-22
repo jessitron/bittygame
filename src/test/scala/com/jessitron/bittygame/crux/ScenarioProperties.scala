@@ -12,6 +12,7 @@ object ScenarioProperties extends Properties("What is this even") with ScenarioG
     if items.nonEmpty
     opp <- opportunityGen(items, scenario.stats)
     if noConflict(scenario, opp)
+    if opp.obstacles.isEmpty // no obstacles currently, so we'll be sure to be blocked by the one we create
     state <- gameStateGen(scenario.title, items, scenario.stats)
     if opp.available(state)
     message <- messageGen
@@ -34,7 +35,7 @@ object ScenarioProperties extends Properties("What is this even") with ScenarioG
         val (postState, happenings) = Turn.act(scenario)(state, trigger)
 
         if (state.hasItem(obstructingItem)) {
-          ((happenings.results.toSet == Set(CantDoThat(disappointment))) :| "Denied!!") &&
+          ((happenings.results.toSet == Set(CantDoThat(disappointment))) :| s"Denied!! $happenings") &&
             ((postState == state) :| s"State doesn't change when obstructed. ${postState}")
         } else {
           (happenings == someOpportunity.results) :| "Without obstacle, OK"

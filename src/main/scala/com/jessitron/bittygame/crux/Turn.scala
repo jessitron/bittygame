@@ -16,7 +16,8 @@ object Turn {
     availableOptions(scenario, previousState).
       find(_.triggeredBy(playerTyped)) match {
       case Some(action) =>
-        (modifyState(previousState, action), action.take(previousState))
+        val happenings = action.take(previousState)
+        (modifyState(previousState, happenings), happenings)
       case None =>
         (previousState, thisHappens(IDontKnowHowTo(playerTyped)))
     }
@@ -31,8 +32,8 @@ object Turn {
   private def availableOptions(scenario: Scenario, gameState: GameState): Seq[Opportunity] =
     scenario.opportunities.filter(_.available(gameState))
 
-  private def modifyState(previousState: GameState, action: Opportunity): GameState =
-    action.results.results.foldLeft(previousState)(modifyStatePerHappening)
+  private def modifyState(previousState: GameState, happenings: WhatHappens): GameState =
+    happenings.results.foldLeft(previousState)(modifyStatePerHappening)
 
   private def modifyStatePerHappening(previousState: GameState, happening: TurnResult) =
     happening match {
