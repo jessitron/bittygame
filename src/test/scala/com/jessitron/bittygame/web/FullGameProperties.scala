@@ -9,50 +9,37 @@ import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalacheck.Prop.BooleanOperators
 
-trait FullGameGen extends ScenarioGen {
-
-  val scenarioDAO : ScenarioDAO
-
-  val SCENARIOS_TO_GENERATE = 10
-  val severalScenarios : Seq[Scenario] =
-    Iterator.continually(scenarioGen.sample).collect{ case Some(a) => a}.take(SCENARIOS_TO_GENERATE).toSeq
-
-  /*** STORE THEM ***/
-  severalScenarios.foreach { case scenario => scenarioDAO.save(scenario)}
-
-  val storedScenario: Gen[Scenario] = Gen.oneOf(severalScenarios)
-
-  def generatedScenario(key: ScenarioTitle) = severalScenarios.find{ _.title == key}.getOrElse(throw new RuntimeException("Where did it go?"))
-
-}
 
 class FullGameProperties
   extends org.scalatest.PropSpec
   with GeneratorDrivenPropertyChecks
   with ShouldMatchers
   with BittyGameServiceInfrastructure
-  with FullGameGen {
+  with ScenarioGen {
 
   val whatINeed: Gen[(Scenario, Seq[String], Seq[String])] = for {
-    scenario <- storedScenario
+    scenario <- scenarioGen
     validMoves = scenario.opportunities.map(_.trigger) // TODO: that don't exit the game
     someValidMoves <- Gen.listOf(Gen.oneOf(validMoves))
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario, someValidMoves, someInvalidMoves)
 
-  implicit val ownSpecialShrinker: Shrink[(Scenario, Seq[String], Seq[String])] = Shrink {
-    case(scenario, moves, moreMoves) =>
-      val fewerValidMoves = if (moves.nonEmpty) Some(scenario, moves.dropRight(1), moreMoves) else None
-      val fewerOtherMoves = if (moreMoves.nonEmpty) Some(scenario, moves, moreMoves.dropRight(1)) else None
-
-      val tryThese = fewerValidMoves.toSeq ++ fewerOtherMoves.toSeq
-      Stream(tryThese :_*)
-  }
+//  implicit val ownSpecialShrinker: Shrink[(Scenario, Seq[String], Seq[String])] = Shrink {
+//    case(scenario, moves, moreMoves) =>
+//      val fewerValidMoves = if (moves.nonEmpty) Some(scenario, moves.dropRight(1), moreMoves) else None
+//      val fewerOtherMoves = if (moreMoves.nonEmpty) Some(scenario, moves, moreMoves.dropRight(1)) else None
+//
+//      val tryThese = fewerValidMoves.toSeq ++ fewerOtherMoves.toSeq
+//      Stream(tryThese :_*)
+//  }
 
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { case (scenario, someValidMoves, someInvalidMoves) =>
       val title = scenario.title
       val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
+
+      /* Step 0: store the scenario */
+      create(scenario)
 
       /* Step 1: take the first turn */
       val gameID = callBeginGame(title).gameID
