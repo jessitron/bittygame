@@ -139,14 +139,19 @@ trait ScenarioGen extends OpportunityGen with ScenarioTitleGen with StatGen with
 
   val welcomeMessageGen: Gen[MessageToThePlayer] = nonEmptyString
 
+  def soMany[T](low: Int, high: Int, what: Gen[T]) : Gen[Seq[T]] =
+    for {
+      howMany <- Gen.choose(low, high)
+      hereTheyAre <- Gen.listOfN(howMany, what)
+    } yield hereTheyAre
+
   val scenarioGen: Gen[Scenario] = for {
     title <- scenarioTitleGen
     welcome <- welcomeMessageGen
     stats <- someStatsGen
     items <- someItemsGen
-    howManyOpportunities <- Gen.choose(2, 12)
-    possibilities <- Gen.listOfN(howManyOpportunities, opportunityGen(items,stats))
-  } yield Scenario(title, possibilities, welcome, stats)
+    opportunities <- soMany(2, 12, opportunityGen(items,stats))
+  } yield Scenario(title, opportunities, welcome, stats, items)
 
 
   def noConflict(scenario: Scenario, opportunity: Opportunity): Boolean =
