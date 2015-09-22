@@ -23,7 +23,7 @@ class FullGameProperties
     someValidMoves <- Gen.listOf(Gen.oneOf(validMoves))
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario, someValidMoves, someInvalidMoves)
-  
+
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { case (scenario, someValidMoves, someInvalidMoves) =>
       val title = scenario.title
@@ -57,7 +57,7 @@ class FullGameProperties
       /* Step 5: check one of the things I can do. I can only check one, because doing so changes the state */
       whenever (thoughts.nonEmpty) {
         val oneThought = scala.util.Random.shuffle(thoughts).head
-        withClue("I think I will: $oneThought") {
+        withClue(s"I think I will: $oneThought") {
           val response = callTakeTurn(gameID, oneThought)
 
           val happenings = response.instructions
