@@ -23,16 +23,7 @@ class FullGameProperties
     someValidMoves <- Gen.listOf(Gen.oneOf(validMoves))
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario, someValidMoves, someInvalidMoves)
-
-//  implicit val ownSpecialShrinker: Shrink[(Scenario, Seq[String], Seq[String])] = Shrink {
-//    case(scenario, moves, moreMoves) =>
-//      val fewerValidMoves = if (moves.nonEmpty) Some(scenario, moves.dropRight(1), moreMoves) else None
-//      val fewerOtherMoves = if (moreMoves.nonEmpty) Some(scenario, moves, moreMoves.dropRight(1)) else None
-//
-//      val tryThese = fewerValidMoves.toSeq ++ fewerOtherMoves.toSeq
-//      Stream(tryThese :_*)
-//  }
-
+  
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { case (scenario, someValidMoves, someInvalidMoves) =>
       val title = scenario.title
@@ -50,36 +41,31 @@ class FullGameProperties
       /* Step 3: perform the test */
       val thoughts = callThink(gameID)
 
-      /* Step 4: check the state of the output data in the world */
-      
-      def isRecognized(thought: String) : Prop = isRecognizedResponse(callTakeTurn(gameID, thought)) :| s"Not recognized: <$thought>"
-      val canDoAllTheThingsWeCanThink: Prop =
-        Prop.all(
-          thoughts.map(isRecognized)
-          : _*)
+      /* Step 4: check all the things I can't do */
 
       val unthought =
         allTriggers(scenario).                 // everything in the game
           filterNot(thoughts.contains(_))      // that we didn't think of
 
-      def notRecognized(thought: String) : Prop = isUnrecognizedResponse(callTakeTurn(gameID, thought)) :| s"Oops, recognized: <$thought>"
-      val cannotDoThingsWeDidntThinkOf =
-        Prop.all(
-          unthought.map(notRecognized)
-            : _*)
-
-      // using ScalaCheck to accumulate ACTUAL DATA about the failure. Could have used Scalatest 'withClue' instead
-      val propertyResult =
-        Test.check(Test.Parameters.default,
-          canDoAllTheThingsWeCanThink && cannotDoThingsWeDidntThinkOf)
-
-      /* Step 5: give Scalatest its exception if the properties don't hold */
-      withClue(s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}\n Thought of: $thoughts") {
-        propertyResult.passed should be(true)
+      unthought.foreach { notThought =>
+        withClue(s"We should not recognize $notThought") {
+          val response = callTakeTurn(gameID, notThought)
+          assert(response.instructions.exists(iDontKnowHow), s"should say I don't know how. Got: $response")
+        }
       }
 
-    }
+      /* Step 5: check one of the things I can do. I can only check one, because doing so changes the state */
+      whenever (thoughts.nonEmpty) {
+        val oneThought = scala.util.Random.shuffle(thoughts).head
+        withClue("I think I will: $oneThought") {
+          val response = callTakeTurn(gameID, oneThought)
 
+          val happenings = response.instructions
+          assert(happenings.nonEmpty, "something should happen")
+          assert(!happenings.exists(iDontKnowHow),s"don't say I don't know how to. Said: $happenings")
+        }
+      }
+    }
   }
 
   private def allTriggers(scenario: Scenario): Seq[String] =
@@ -90,22 +76,6 @@ class FullGameProperties
       case IDontKnowHowTo(_) => true
       case _ => false
     }
-
-  private def labels(status: Test.Status): Set[String] =
-    status match {
-      case Test.Failed(_, labels) => labels
-      case _ => Set()
-    }
-
-  private def isRecognizedResponse(response: GameResponse): Prop = {
-    val happenings = response.instructions
-    (happenings.nonEmpty :| "something should happen") &&
-      (!happenings.exists(iDontKnowHow) :| "don't say I don't know how to")
-  }
-
-  private def isUnrecognizedResponse(response: GameResponse) : Prop = {
-    response.instructions.exists(iDontKnowHow) :| "should say I don't know how"
-  }
 
   // TODO: we never get what the client can't handle
 
