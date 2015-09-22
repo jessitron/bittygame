@@ -50,7 +50,7 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
 
   implicit val whatHappensShrink: Shrink[WhatHappens] = Shrink {
     orig =>
-      Shrink.shrink(orig.results).map(x => orig.copy(results = x))
+      Shrink.shrink(orig.results).filter(_.nonEmpty).map(x => orig.copy(results = x))
   }
   
   val anythingCouldHappenGen =
