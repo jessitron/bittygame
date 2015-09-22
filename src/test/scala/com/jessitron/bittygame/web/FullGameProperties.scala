@@ -4,7 +4,7 @@ import com.jessitron.bittygame.crux._
 import com.jessitron.bittygame.gen.{ScenarioGen}
 import com.jessitron.bittygame.web.messages.GameResponse
 import com.jessitron.bittygame.web.ports.ScenarioDAO
-import org.scalacheck.{Test, Prop, Gen}
+import org.scalacheck.{Shrink, Test, Prop, Gen}
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalacheck.Prop.BooleanOperators
@@ -40,9 +40,17 @@ class FullGameProperties
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario, someValidMoves, someInvalidMoves)
 
+  implicit val ownSpecialShrinker: Shrink[(Scenario, Seq[String], Seq[String])] = Shrink {
+    case(scenario, moves, moreMoves) =>
+      val fewerValidMoves = if (moves.nonEmpty) Some(scenario, moves.dropRight(1), moreMoves) else None
+      val fewerOtherMoves = if (moreMoves.nonEmpty) Some(scenario, moves, moreMoves.dropRight(1)) else None
+
+      val tryThese = fewerValidMoves.toSeq ++ fewerOtherMoves.toSeq
+      Stream(tryThese :_*)
+  }
+
   property("Anything returned by Think, it knows how to do") {
-    forAll(whatINeed) { input =>
-      val (scenario, someValidMoves, someInvalidMoves) = input
+    forAll(whatINeed) { case (scenario, someValidMoves, someInvalidMoves) =>
       val title = scenario.title
       val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
 
@@ -79,7 +87,9 @@ class FullGameProperties
           canDoAllTheThingsWeCanThink && cannotDoThingsWeDidntThinkOf)
 
       /* Step 5: give Scalatest its exception if the properties don't hold */
-      assert(propertyResult.passed, s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}\n Thought of: $thoughts")
+      withClue(s"Failure: ${labels(propertyResult.status)}\n ${printScenario(scenario)}\n Thought of: $thoughts") {
+        propertyResult.passed should be(true)
+      }
 
     }
 
