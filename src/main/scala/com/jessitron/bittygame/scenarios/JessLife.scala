@@ -54,5 +54,5 @@ object JessLife {
   val scenario = Scenario("jesslife",
     Seq(gradSchool, amdocs, computerInternship, payForCollege, goToCollege,
         takeTest, drinking, pleaseTheTeachers),
-    welcome, Seq(grades))
+    welcome, Seq(grades), Seq(loveOfProgramming, loveOfProgramming, loveOfProgramming))
 }

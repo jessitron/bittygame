@@ -30,9 +30,9 @@ package object serialization {
     def mustBeFormat = jsonFormat2(MustBeHighEnough)
   }
 
-  implicit def thingThatCanHappenWriter(implicit itemFormat: JsonFormat[Item]): JsonFormat[ThingThatCanHappen] = new JsonFormat[ThingThatCanHappen] {
+  implicit def thingThatCanHappenWriter(implicit itemFormat: JsonFormat[Item]): JsonFormat[TurnResult] = new JsonFormat[TurnResult] {
 
-    override def write(obj: ThingThatCanHappen): JsValue = {
+    override def write(obj: TurnResult): JsValue = {
       val fields = obj match {
         case ExitGame => Map("type" -> "exit").mapValues(JsString(_))
         case Print(m) => Map("type" -> "print", "message" -> m).mapValues(JsString(_))
@@ -48,7 +48,7 @@ package object serialization {
     private def fail(why: String, json: JsValue): Nothing =
       throw new RuntimeException(s"Could not deserialize ThingThatCanHappen; $why. Received:${json.prettyPrint}")
 
-    override def read(json: JsValue): ThingThatCanHappen = {
+    override def read(json: JsValue): TurnResult = {
       val mappy = json.asInstanceOf[JsObject].fields
       mappy.getOrElse("type", fail("no type", json)).asInstanceOf[JsString].value match {
         case "exit"  => ExitGame
@@ -68,7 +68,7 @@ package object serialization {
   implicit val statWriter: JsonFormat[Stat] = jsonFormat4(Stat.apply)
 
   implicit val playerActionFormat: RootJsonFormat[Opportunity] = jsonFormat4(Opportunity.apply)
-  implicit val scenarioFormat: RootJsonFormat[Scenario] = jsonFormat4(Scenario.apply)
+  implicit val scenarioFormat: RootJsonFormat[Scenario] = jsonFormat5(Scenario.apply)
 
   implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat3(GameState.apply)
 }

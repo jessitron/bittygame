@@ -1,22 +1,22 @@
 package com.jessitron.bittygame.serialization
 
-import com.jessitron.bittygame.crux.{Acquire, Item, ThingThatCanHappen}
+import com.jessitron.bittygame.crux.{Acquire, Item, TurnResult}
+import com.jessitron.bittygame.gen.ThingThatCanHappenGen
 import org.scalatest.{FunSpec, Assertions, PropSpec}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 import spray.json._
 import spray.json.DefaultJsonProtocol._
 
-import com.jessitron.bittygame.gen.ThingThatCanHappenGen._
-
 class ThingsThatCanHappenSerializationSpec
-  extends PropSpec with GeneratorDrivenPropertyChecks with Assertions {
+  extends PropSpec with GeneratorDrivenPropertyChecks with Assertions
+  with ThingThatCanHappenGen {
 
   property("Round trip") {
-    forAll { thing: ThingThatCanHappen =>
-      val serialized: String = thing.toJson.compactPrint
-      val deserialized = serialized.parseJson.convertTo[ThingThatCanHappen]
-      assert(thing === deserialized, s"Not successfully parsed: $serialized")
+    forAll { turnResult: TurnResult =>
+      val serialized: String = turnResult.toJson.compactPrint
+      val deserialized = serialized.parseJson.convertTo[TurnResult]
+      assert(turnResult === deserialized, s"Not successfully parsed: $serialized")
     }
   }
 
@@ -37,12 +37,12 @@ class ThingsThatCanHappenSerializationExamples extends FunSpec {
     }
 
     it ("can handle acquire" ) {
-      val thing: ThingThatCanHappen = Acquire(Item("poo"))
+      val thing: TurnResult = Acquire(Item("poo"))
 
       val serialized: JsValue = thing.toJson
-      val deserialized = serialized.convertTo[Map[String,JsValue]]
+      val asMap = serialized.convertTo[Map[String,JsValue]]
 
-      assert(deserialized.contains("type"))
+      assert(asMap("type") == JsString("acquire"))
 
     }
   }

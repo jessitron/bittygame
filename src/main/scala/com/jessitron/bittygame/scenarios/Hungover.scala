@@ -1,6 +1,6 @@
 package com.jessitron.bittygame.scenarios
 
-import com.jessitron.bittygame.crux.{Opportunity, Scenario}
+import com.jessitron.bittygame.crux.{Item, Opportunity, Scenario}
 
 object Hungover {
 
@@ -43,6 +43,6 @@ object Hungover {
 
   val magicWin = Opportunity.victory("strangeloop", "You said the magic word!")
 
-  val scenario: Scenario = Scenario("Hungover", Seq(lookAroundBedroom, magicWin), welcome, Seq())
+  val scenario: Scenario = Scenario("Hungover", Seq(lookAroundBedroom, magicWin), welcome, Seq(), Seq(Item("pizza")))
 
 }

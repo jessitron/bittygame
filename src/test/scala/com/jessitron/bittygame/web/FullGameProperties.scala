@@ -24,6 +24,18 @@ class FullGameProperties
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
   } yield (scenario, someValidMoves, someInvalidMoves)
 
+//  forAll(middleOfGameGen )
+//  {
+//    game => val options = game.init().think()
+//      assertValidMove(game, option.shuffle().first())
+//
+//  }
+//  forAll(middleOfGameGen, BadMoveGenerator  )
+//  {
+//    , move => val options = game.init().think()
+//      assertInValidMove(game, move)
+//
+//  }
   property("Anything returned by Think, it knows how to do") {
     forAll(whatINeed) { case (scenario, someValidMoves, someInvalidMoves) =>
       val title = scenario.title
@@ -71,7 +83,7 @@ class FullGameProperties
   private def allTriggers(scenario: Scenario): Seq[String] =
     scenario.opportunities.map(_.trigger)
 
-  private def iDontKnowHow(thing: ThingThatCanHappen): Boolean =
+  private def iDontKnowHow(thing: TurnResult): Boolean =
     thing match {
       case IDontKnowHowTo(_) => true
       case _ => false

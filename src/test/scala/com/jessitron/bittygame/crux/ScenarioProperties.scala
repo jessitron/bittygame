@@ -6,29 +6,39 @@ import org.scalacheck.Prop.BooleanOperators
 
 object ScenarioProperties extends Properties("What is this even") with ScenarioGen {
 
+  val whatINeed = for {
+    scenario <- scenarioGen
+    items = scenario.items
+    if items.nonEmpty
+    opp <- opportunityGen(items, scenario.stats)
+    if noConflict(scenario, opp)
+    state <- gameStateGen(scenario.title, items, scenario.stats)
+    if opp.available(state)
+    message <- messageGen
+  } yield (items.head, message, opp, scenario, state)
+
   property("An item can be an obstacle that prevents an option from being taken successfully, but not from being seen") =
-    Prop.forAll(itemGen, messageGen, printActionGen, scenarioAndStateGen) {
-      (obstructingItem: Item,
-       disappointment: MessageToThePlayer,
-       someOpportunity: Opportunity,
-       sas: (Scenario, GameState)) =>
+    Prop.forAll(whatINeed) {
+      case (obstructingItem: Item,
+      disappointment: MessageToThePlayer,
+      someOpportunity: Opportunity,
+      s: Scenario,
+      state: GameState) =>
 
-        val (s, stateWithoutItem) = sas
-        noConflict(s, someOpportunity) ==> {
+        val trigger = someOpportunity.trigger
+        val blockedOpportunity =
+          someOpportunity.behindObstacle(Has(obstructingItem), disappointment)
 
-          val trigger = someOpportunity.trigger
-          val blockedOpportunity =
-            someOpportunity.behindObstacle(Has(obstructingItem), disappointment)
+        val scenario = s.addPossibility(blockedOpportunity)
 
-          val scenario = s.addPossibility(blockedOpportunity)
+        val (postState, happenings) = Turn.act(scenario)(state, trigger)
 
-          val stateWithItem = stateWithoutItem.addToInventory(obstructingItem)
-
-          val (_, obstructedHappenings) = Turn.act(scenario)(stateWithItem, trigger)
-          val (_, unobstructedHappenings) = Turn.act(scenario)(stateWithoutItem, trigger)
-
-          ((obstructedHappenings.results.toSet == Set(CantDoThat(disappointment))) :| "Denied!!") &&
-            ((unobstructedHappenings == someOpportunity.results) :| "Without obstacle, OK")
+        if (state.hasItem(obstructingItem)) {
+          ((happenings.results.toSet == Set(CantDoThat(disappointment))) :| "Denied!!") &&
+            ((postState == state) :| s"State doesn't change when obstructed. ${postState}")
+        } else {
+          (happenings == someOpportunity.results) :| "Without obstacle, OK"
         }
+
     }
 }

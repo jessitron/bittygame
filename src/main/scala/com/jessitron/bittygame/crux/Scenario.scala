@@ -35,7 +35,8 @@ object Opportunity {
 case class Scenario(title: ScenarioTitle,
                     opportunities: Seq[Opportunity],
                     welcome: MessageToThePlayer,
-                    stats: Seq[Stat]) {
+                    stats: Seq[Stat],
+                    items: Seq[Item]) {
   def addPossibility(a: Opportunity) = {
     assert(!opportunities.exists(_.conflictsWith(a)), "That conflicts with an existing possibility")
     copy(opportunities = opportunities :+ a)
@@ -43,17 +44,6 @@ case class Scenario(title: ScenarioTitle,
   def addStat(s: Stat) = {
     assert(!stats.map(_.name).contains(s.name), "Conflict with existing stat: " + s.name)
     copy(stats = stats :+ s)
-  }
-
-  def items: Seq[Item] = {
-    // consider making this separately declared
-    val allTheThingsThatCanHappen =
-      for {
-        opp <- opportunities
-        res <- opp.results.results
-      } yield res
-
-    allTheThingsThatCanHappen.collect { case Acquire(item) => item }
   }
 
   override def toString =

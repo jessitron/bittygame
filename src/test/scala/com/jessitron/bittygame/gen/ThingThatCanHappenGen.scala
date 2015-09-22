@@ -17,7 +17,7 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
   val dontKnowHowGen = nonEmptyString.map(IDontKnowHowTo(_))
   val cantDoItGen = nonEmptyString.map(CantDoThat(_))
 
-  val thingGen: Gen[ThingThatCanHappen] =
+  val thingGen: Gen[TurnResult] =
     Gen.oneOf(
       exitGen,
       printGen,
@@ -27,7 +27,7 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
       cantDoItGen
     )
 
-  implicit val arbThing: Arbitrary[ThingThatCanHappen] = Arbitrary(thingGen)
+  implicit val arbThing: Arbitrary[TurnResult] = Arbitrary(thingGen)
 
   def acquireSomeOf(noMoreThan: Int, itemsInGame: Seq[Item]) = for {
     howManyItems <- Gen.choose(1, min(noMoreThan, itemsInGame.length))

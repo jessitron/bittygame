@@ -34,7 +34,7 @@ object Turn {
   private def modifyState(previousState: GameState, action: Opportunity): GameState =
     action.results.results.foldLeft(previousState)(modifyStatePerHappening)
 
-  private def modifyStatePerHappening(previousState: GameState, happening: ThingThatCanHappen) =
+  private def modifyStatePerHappening(previousState: GameState, happening: TurnResult) =
     happening match {
       case Acquire(item) => previousState.addToInventory(item)
       case IncreaseStat(statName) => previousState.increase(statName)

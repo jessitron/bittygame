@@ -1,31 +1,31 @@
 package com.jessitron.bittygame.crux
 
 
-sealed trait ThingThatCanHappen
-case class Print(message: MessageToThePlayer) extends ThingThatCanHappen {
+sealed trait TurnResult
+case class Print(message: MessageToThePlayer) extends TurnResult {
   assert(message.nonEmpty, "An empty message is worse than no message at all" )
 }
-case object ExitGame extends ThingThatCanHappen
-case object Win extends ThingThatCanHappen
-case class Acquire(item: Item) extends ThingThatCanHappen
-case class IDontKnowHowTo(what: String) extends ThingThatCanHappen
-case class CantDoThat(why: MessageToThePlayer) extends ThingThatCanHappen
-case class IncreaseStat(which: StatID) extends ThingThatCanHappen
+case object ExitGame extends TurnResult
+case object Win extends TurnResult
+case class Acquire(item: Item) extends TurnResult
+case class IDontKnowHowTo(what: String) extends TurnResult
+case class CantDoThat(why: MessageToThePlayer) extends TurnResult
+case class IncreaseStat(which: StatID) extends TurnResult
 
-case class WhatHappens(results: Seq[ThingThatCanHappen]) {
-  def andMaybe(mightHappen: Option[ThingThatCanHappen]): WhatHappens =
+case class WhatHappens(results: Seq[TurnResult]) {
+  def andMaybe(mightHappen: Option[TurnResult]): WhatHappens =
     mightHappen match {
       case None => this
       case Some(thing) => this.and(thing)
     }
 
-  def and(nextThing: ThingThatCanHappen) = this.copy(results = results :+ nextThing)
+  def and(nextThing: TurnResult) = this.copy(results = results :+ nextThing)
 
-  def tellTheClient: Seq[ThingThatCanHappen] = results
+  def tellTheClient: Seq[TurnResult] = results
 }
 
 object WhatHappens {
   val NothingHappens = WhatHappens(Seq())
 
-  def thisHappens(one: ThingThatCanHappen): WhatHappens = WhatHappens(Seq(one))
+  def thisHappens(one: TurnResult): WhatHappens = WhatHappens(Seq(one))
 }

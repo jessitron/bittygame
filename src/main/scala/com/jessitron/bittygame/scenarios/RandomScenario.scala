@@ -58,7 +58,7 @@ class RandomScenario(firstPartsOfSentence: Seq[String],
     welcomeMessage <- funMessage(5)
     actions <- Gen.listOfN(numActions, funAction)
     winningAction <- victory.suchThat(v => !actions.exists(_.conflictsWith(v)))
-  } yield Scenario(title, scala.util.Random.shuffle(actions :+ winningAction), welcomeMessage, Seq())
+  } yield Scenario(title, scala.util.Random.shuffle(actions :+ winningAction), welcomeMessage, Seq(), Seq())
 
   def create(): Scenario = Util.untilYouGetOne(funGameGen(numActions = 5).sample)
 
