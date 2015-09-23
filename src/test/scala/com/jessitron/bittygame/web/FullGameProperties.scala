@@ -2,13 +2,13 @@ package com.jessitron.bittygame.web
 
 import com.jessitron.bittygame.crux._
 import com.jessitron.bittygame.gen.{ScenarioGen}
+import com.jessitron.bittygame.web.identifiers.GameID
 import com.jessitron.bittygame.web.messages.GameResponse
 import com.jessitron.bittygame.web.ports.ScenarioDAO
 import org.scalacheck.{Shrink, Test, Prop, Gen}
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalacheck.Prop.BooleanOperators
-
 
 class FullGameProperties
   extends org.scalatest.PropSpec
@@ -17,46 +17,24 @@ class FullGameProperties
   with BittyGameServiceInfrastructure
   with ScenarioGen {
 
-  val whatINeed: Gen[(Scenario, Seq[String], Seq[String])] = for {
+  val whatINeed: Gen[MiddleOfGame] = for {
     scenario <- scenarioGen
-    validMoves = scenario.opportunities.map(_.trigger) // TODO: that don't exit the game
+    validMoves = scenario.opportunities.filter(_.willExit).map(_.trigger)
     someValidMoves <- Gen.listOf(Gen.oneOf(validMoves))
     someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
-  } yield (scenario, someValidMoves, someInvalidMoves)
+  } yield MiddleOfGame(scenario, someValidMoves, someInvalidMoves)
 
-//  forAll(middleOfGameGen )
-//  {
-//    game => val options = game.init().think()
-//      assertValidMove(game, option.shuffle().first())
-//
-//  }
-//  forAll(middleOfGameGen, BadMoveGenerator  )
-//  {
-//    , move => val options = game.init().think()
-//      assertInValidMove(game, move)
-//
-//  }
   property("Anything returned by Think, it knows how to do") {
-    forAll(whatINeed) { case (scenario, someValidMoves, someInvalidMoves) =>
-      val title = scenario.title
-      val moves = scala.util.Random.shuffle(someValidMoves ++ someInvalidMoves)
+    forAll(whatINeed) { middleOfGame =>
 
-      /* Step 0: store the scenario */
-      create(scenario)
+      val gameID = middleOfGame.goThere(this)
 
-      /* Step 1: take the first turn */
-      val gameID = callBeginGame(title).gameID
-
-      /* Step 2: take more turns, get into some random place */
-      moves.foreach(callTakeTurn(gameID, _))
-
-      /* Step 3: perform the test */
+      /* Step 2: perform the test */
       val thoughts = callThink(gameID)
 
-      /* Step 4: check all the things I can't do */
+      /* Step 3: check all the things I can't do */
 
-      val unthought =
-        allTriggers(scenario).                 // everything in the game
+      val unthought = middleOfGame.allMovesThatMightEverBePossible. // everything in the game
           filterNot(thoughts.contains(_))      // that we didn't think of
 
       unthought.foreach { notThought =>
