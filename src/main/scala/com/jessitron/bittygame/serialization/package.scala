@@ -10,7 +10,7 @@ package object serialization {
     override def write(obj: Condition): JsValue = {
       val fields = obj match {
         case Has(item) => Map("type" -> JsString("has"), "item" -> itemFormat.write(item))
-        case Has(item) => Map("type" -> JsString("nothas"), "item" -> itemFormat.write(item))
+        case NotHas(item) => Map("type" -> JsString("nothas"), "item" -> itemFormat.write(item))
         case x:StatAtLeast => val base = mustBeFormat.write(x).asJsObject; base.fields + ("type" -> JsString("YouCanDotheThing"))
         case x:StatLowerThan => val base = statLowerThan.write(x).asJsObject; base.fields + ("type" -> JsString("StatLowerThan"))
       }
