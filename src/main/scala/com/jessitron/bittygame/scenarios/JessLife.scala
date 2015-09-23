@@ -29,7 +29,7 @@ object JessLife {
 
   private val drinking = Opportunity.printing("get drunk a lot",
     "All the other kids are doing it. Now you have people to hang out with."). // TODO: lower grades
-    andIncrease(tasteForAlcohol.name)
+    andIncrease(tasteForAlcohol.name).onlyIf(NotHas(steadyIncome))
 
   private val drama = Opportunity.printing("help with my grandmother's plays",
    """While your grandmother is the director at the local college, you take the parts of missing actors at rehearsals, and participate in the travelling drama troupe. You get comfortable on stage."""
@@ -75,7 +75,7 @@ object JessLife {
   """Two healthy, happy daughters. Now to keep them alive, and hopefully, keep them silly. Growing up is overrated.""").
   onlyIf(Has(house)).onlyIf(Has(husband)).andProvides(children)
 
-  private val meetTed = Opportunity.printing("check your phone at the right time",
+  private val meetTed = Opportunity.printing("check my phone at the right time",
    """Facebook says that your favorite speaker is at the Java User Group tonight. If you rush, you could ask him for a beer. Stay home, or go network?""").
   onlyIf(Has(steadyIncome)).andProvides(chanceToMeetTed).onlyIf(NotHas(chanceToMeetTed))
 
