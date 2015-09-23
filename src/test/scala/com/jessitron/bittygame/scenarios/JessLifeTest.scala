@@ -8,7 +8,6 @@ class JessLifeTest extends FunSpec with BittyGameServiceInfrastructure {
 
   val scen = JessLife.scenario
   val turns = Seq("pay for college",
-    "homework",
     "do all your homework",
     "pay for college",
     "get drunk",

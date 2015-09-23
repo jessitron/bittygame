@@ -10,6 +10,7 @@ package object serialization {
     override def write(obj: Condition): JsValue = {
       val fields = obj match {
         case Has(item) => Map("type" -> JsString("has"), "item" -> itemFormat.write(item))
+        case Has(item) => Map("type" -> JsString("nothas"), "item" -> itemFormat.write(item))
         case x:MustBeHighEnough => val base = mustBeFormat.write(x).asJsObject; base.fields + ("type" -> JsString("YouCanDotheThing"))
       }
       fields.toJson
@@ -22,6 +23,7 @@ package object serialization {
       val mappy = json.asInstanceOf[JsObject].fields
       mappy.getOrElse("type", fail("no type", json)) match {
         case JsString("has") => Has(itemFormat.read(mappy.getOrElse("item", fail("Has needs item", json))))
+        case JsString("nothas") => NotHas(itemFormat.read(mappy.getOrElse("item", fail("Has needs item", json))))
         case JsString("YouCanDotheThing") => mustBeFormat.read(json)
         case _ => throw new RuntimeException("I don't know how to deserialize this condition: " + json.prettyPrint)
       }
