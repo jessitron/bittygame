@@ -8,17 +8,18 @@ case class Obstacle(condition: Condition, sadness: MessageToThePlayer) {
 }
 
 case class Opportunity(trigger: Trigger, results: WhatHappens, conditions: Seq[Condition], obstacles: Seq[Obstacle]) {
+
   def take(previousState: GameState): WhatHappens =
     obstacles.find(_.applies(previousState)).
       map(obstacle => obstacle.results).
       getOrElse(results)
 
   def available(gameState: GameState): Boolean = conditions.forall(Condition.met(_, gameState))
-
   def conflictsWith(other: Opportunity) = other.trigger == trigger
+  def triggeredBy(str: String) = trigger.equalsIgnoreCase(str)
+  def willExit: Boolean = results.results.contains(ExitGame)
 
   def behindObstacle(condition: Condition, disappointment: MessageToThePlayer): Opportunity = copy(obstacles = obstacles :+ Obstacle(condition, disappointment))
-  def triggeredBy(str: String) = trigger.equalsIgnoreCase(str)
   def andProvides(item: Item) = copy(results = results.and(Acquire(item)))
   def andWin = copy(results = results.and(Win))
   def andExit = copy(results = results.and(ExitGame))
