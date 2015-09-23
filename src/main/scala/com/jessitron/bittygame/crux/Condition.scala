@@ -3,7 +3,8 @@ package com.jessitron.bittygame.crux
 sealed trait Condition
 case class Has(item: Item) extends Condition
 case class NotHas(item: Item) extends Condition
-case class MustBeHighEnough(stat: StatID, value: Int) extends Condition
+case class StatAtLeast(stat: StatID, value: Int) extends Condition
+case class StatLowerThan(stat: StatID, value: Int) extends Condition
 
 object Condition {
 
@@ -11,7 +12,8 @@ object Condition {
     condition match {
       case Has(item)    =>  gameState.hasItem(item)
       case NotHas(item) => !gameState.hasItem(item)
-      case MustBeHighEnough(stat, level) => gameState.statValue(stat) >= level
+      case StatAtLeast(stat, level)   => level <= gameState.statValue(stat)
+      case StatLowerThan(stat, level) => gameState.statValue(stat) < level
       case _ => false
     }
 }

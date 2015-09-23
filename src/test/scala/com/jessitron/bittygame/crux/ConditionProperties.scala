@@ -10,7 +10,7 @@ object ConditionProperties extends Properties("Conditionals are the backbone of 
   private val HighEnoughConditionNotMetByState: Gen[(Condition, GameState)] = for {
     stat <- statGen
     bar <- Gen.choose(minStatLow + 1, maxStatHigh)
-    condition = MustBeHighEnough(stat.name, bar)
+    condition = StatAtLeast(stat.name, bar)
     myLevel <- Gen.choose(minStatLow, bar - 1)
     someState <- gameStateGen("a game of Lizards", Seq(), Seq(stat))
     state = someState.newStat(stat.name, myLevel)

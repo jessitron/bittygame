@@ -11,7 +11,8 @@ package object serialization {
       val fields = obj match {
         case Has(item) => Map("type" -> JsString("has"), "item" -> itemFormat.write(item))
         case Has(item) => Map("type" -> JsString("nothas"), "item" -> itemFormat.write(item))
-        case x:MustBeHighEnough => val base = mustBeFormat.write(x).asJsObject; base.fields + ("type" -> JsString("YouCanDotheThing"))
+        case x:StatAtLeast => val base = mustBeFormat.write(x).asJsObject; base.fields + ("type" -> JsString("YouCanDotheThing"))
+        case x:StatLowerThan => val base = statLowerThan.write(x).asJsObject; base.fields + ("type" -> JsString("StatLowerThan"))
       }
       fields.toJson
     }
@@ -25,11 +26,13 @@ package object serialization {
         case JsString("has") => Has(itemFormat.read(mappy.getOrElse("item", fail("Has needs item", json))))
         case JsString("nothas") => NotHas(itemFormat.read(mappy.getOrElse("item", fail("Has needs item", json))))
         case JsString("YouCanDotheThing") => mustBeFormat.read(json)
+        case JsString("StatLowerThan") => statLowerThan.read(json)
         case _ => throw new RuntimeException("I don't know how to deserialize this condition: " + json.prettyPrint)
       }
     }
 
-    def mustBeFormat = jsonFormat2(MustBeHighEnough)
+    def mustBeFormat = jsonFormat2(StatAtLeast)
+    def statLowerThan = jsonFormat2(StatLowerThan)
   }
 
   implicit def thingThatCanHappenWriter(implicit itemFormat: JsonFormat[Item]): JsonFormat[TurnResult] = new JsonFormat[TurnResult] {

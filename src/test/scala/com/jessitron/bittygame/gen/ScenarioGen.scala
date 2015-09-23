@@ -14,7 +14,7 @@ trait ConditionGen {
   def mustHaveAStatGen(stat: Stat) =
     for {
       level <- Gen.choose(stat.low + 1, stat.high)
-    } yield MustBeHighEnough(stat.name, level)
+    } yield StatAtLeast(stat.name, level)
 
   def bigMustHaveGen(stats:Seq[Stat]) =
     for{
@@ -34,7 +34,7 @@ trait ConditionGen {
   import scala.collection.JavaConversions._ // OMFG
   def conditionsGen(itemsInGame: Seq[Item], statsInGame: Seq[Stat]) : Gen[Seq[Condition]] = for {
     itemLimits <- Gen.someOf(itemsInGame.map(Has(_)))
-    statThingers: Seq[MustBeHighEnough] <- Gen.sequence(statsInGame.map(mustHaveAStatGen)).map(_.toSeq)
+    statThingers: Seq[StatAtLeast] <- Gen.sequence(statsInGame.map(mustHaveAStatGen)).map(_.toSeq)
     statHighEnough <- Gen.someOf(statThingers)
   } yield itemLimits ++ statHighEnough
 }
