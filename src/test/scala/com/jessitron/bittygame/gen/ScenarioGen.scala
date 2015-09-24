@@ -39,7 +39,7 @@ trait ConditionGen {
   } yield itemLimits ++ statHighEnough
 }
 
-trait OpportunityGen extends ThingThatCanHappenGen with ItemGen with ConditionGen with NonEmptyStringGen {
+trait OpportunityGen extends TurnResultGen with ItemGen with ConditionGen with NonEmptyStringGen {
 
   val triggerGen: Gen[Trigger] = nonEmptyString
 

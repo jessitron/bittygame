@@ -7,7 +7,7 @@ import org.scalacheck.util.Pretty
 import org.scalacheck.{Shrink, Gen, Arbitrary}
 import scala.util.Random.shuffle
 
-trait ThingThatCanHappenGen extends ItemGen with StatGen {
+trait TurnResultGen extends ItemGen with StatGen {
 
   val printGen = nonEmptyString.map(Print(_))
 
@@ -16,7 +16,7 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
   val getAThingGen = itemGen.map(Acquire(_))
   val dontKnowHowGen = nonEmptyString.map(IDontKnowHowTo(_))
   val cantDoItGen = nonEmptyString.map(CantDoThat(_))
-  // TODO: add increase stat
+  val increaseStatGen = statGen.map(stat => IncreaseStat(stat.name))
 
   val thingGen: Gen[TurnResult] =
     Gen.oneOf(
@@ -24,6 +24,7 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
       printGen,
       winGen,
       getAThingGen,
+      increaseStatGen,
       dontKnowHowGen,
       cantDoItGen
     )
@@ -81,4 +82,4 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
 
 }
 
-object ThingThatCanHappenGen extends ThingThatCanHappenGen
+object TurnResultGen extends TurnResultGen
