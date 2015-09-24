@@ -16,6 +16,7 @@ trait ThingThatCanHappenGen extends ItemGen with StatGen {
   val getAThingGen = itemGen.map(Acquire(_))
   val dontKnowHowGen = nonEmptyString.map(IDontKnowHowTo(_))
   val cantDoItGen = nonEmptyString.map(CantDoThat(_))
+  // TODO: add increase stat
 
   val thingGen: Gen[TurnResult] =
     Gen.oneOf(

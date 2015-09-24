@@ -17,49 +17,60 @@ class FullGameProperties
   with BittyGameServiceInfrastructure
   with ScenarioGen {
 
-  val whatINeed: Gen[MiddleOfGame] = for {
-    scenario <- scenarioGen
-    validMoves = scenario.opportunities.filter(_.willExit).map(_.trigger)
-    someValidMoves <- Gen.listOf(Gen.oneOf(validMoves))
-    someInvalidMoves <- Gen.listOfN(2, triggerGen.suchThat(!someValidMoves.contains(_)))
-  } yield MiddleOfGame(scenario, someValidMoves, someInvalidMoves)
-
   property("Anything returned by Think, it knows how to do") {
-    forAll(whatINeed) { middleOfGame =>
+    forAll(MiddleOfGame.gen) { middleOfGame =>
 
+      /* Set up */
       val gameID = middleOfGame.goThere(this)
 
-      /* Step 2: perform the test */
+      /* Test */
       val thoughts = callThink(gameID)
 
-      /* Step 3: check all the things I can't do */
-
-      val unthought = middleOfGame.allMovesThatMightEverBePossible. // everything in the game
-          filterNot(thoughts.contains(_))      // that we didn't think of
-
-      unthought.foreach { notThought =>
-        withClue(s"We should not recognize $notThought") {
-          val response = callTakeTurn(gameID, notThought)
-          assert(response.instructions.exists(iDontKnowHow), s"should say I don't know how. Got: $response")
-        }
-      }
-
-      /* Step 5: check one of the things I can do. I can only check one, because doing so changes the state */
+      /* Check */
       whenever (thoughts.nonEmpty) {
         val oneThought = scala.util.Random.shuffle(thoughts).head
-        withClue(s"I think I will: $oneThought") {
-          val response = callTakeTurn(gameID, oneThought)
-
-          val happenings = response.instructions
-          assert(happenings.nonEmpty, "something should happen")
-          assert(!happenings.exists(iDontKnowHow),s"don't say I don't know how to. Said: $happenings")
-        }
+        assertRecognized(gameID, oneThought)
       }
     }
   }
 
-  private def allTriggers(scenario: Scenario): Seq[String] =
-    scenario.opportunities.map(_.trigger)
+  property("Anything not returned by Think, it doesn't know how to do") {
+    forAll(MiddleOfGame.gen) { middleOfGame =>
+
+      /* Set up */
+      val gameID = middleOfGame.goThere(this)
+
+      /* Perform the test */
+      val thoughts = callThink(gameID)
+
+      /* Check */
+      val unthought = middleOfGame.
+          allMovesThatMightEverBePossible.     // everything in the game
+          filterNot(thoughts.contains(_))      // that we didn't think of
+
+      assertMovesNotRecognized(gameID, unthought)
+
+    }
+  }
+
+  def assertRecognized(gameID: GameID, oneThought: String): Unit = {
+    withClue(s"I think I will: $oneThought") {
+      val response = callTakeTurn(gameID, oneThought)
+
+      val happenings = response.instructions
+      assert(happenings.nonEmpty, "something should happen")
+      assert(!happenings.exists(iDontKnowHow), s"don't say I don't know how to. Said: $happenings")
+    }
+  }
+
+  def assertMovesNotRecognized(gameID: GameID, unthought: Seq[Trigger]): Unit = {
+    unthought.foreach { notThought =>
+      withClue(s"We should not recognize $notThought") {
+        val response = callTakeTurn(gameID, notThought)
+        assert(response.instructions.exists(iDontKnowHow), s"should say I don't know how. Got: $response")
+      }
+    }
+  }
 
   private def iDontKnowHow(thing: TurnResult): Boolean =
     thing match {

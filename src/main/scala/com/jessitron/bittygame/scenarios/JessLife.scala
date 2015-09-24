@@ -16,6 +16,7 @@ object JessLife {
   private val house = Item("house")
   private val chanceToMeetTed = Item("option to go to the JUG")
   private val speakingMentor = Item("mentor for speaking at conferences")
+  private val scalaJob = Item("functional programming work")
 
   // Stats
   private val grades = Stat("grades", 0, 4, 2)
@@ -64,16 +65,16 @@ object JessLife {
     """).onlyIf(Has(loveOfProgramming)).andProvides(steadyIncome).onlyIf(NotHas(steadyIncome))
 
   private val getMarried = Opportunity.printing("get married",
-     """The months of reading Sports Illustrated and Car &amp; Driver pay off. You find a very nice fellow. He wants a house before babies.""").
+     """The months of reading Sports Illustrated and Car & Driver pay off. You find a very nice fellow. He wants a house before babies.""").
      onlyIf(Has(steadyIncome)).andProvides(husband)
 
   private val buyHouse = Opportunity.printing("buy a house",
    """After viewing 92 houses, you finally pick one. Good school district, quaint street, and wood trim that hasn't been painted.""").
-    onlyIf(Has(steadyIncome)).andProvides(house)
+    onlyIf(Has(steadyIncome)).andProvides(house).onlyIf(NotHas(house))
 
   private val babies = Opportunity.printing("have babies",
   """Two healthy, happy daughters. Now to keep them alive, and hopefully, keep them silly. Growing up is overrated.""").
-  onlyIf(Has(house)).onlyIf(Has(husband)).andProvides(children)
+  onlyIf(Has(house)).onlyIf(Has(husband)).andProvides(children).onlyIf(NotHas(children))
 
   private val meetTed = Opportunity.printing("check my phone at the right time",
    """Facebook says that your favorite speaker is at the Java User Group tonight. If you rush, you could ask him for a beer. Stay home, or go network?""").
@@ -98,7 +99,7 @@ object JessLife {
 
   private val monsantoJob = Opportunity.printing("get new job",
   """Monsanto has an opening for a Scala developer! You're close enough. There, you learn a ton about Scala, biotech, distributed systems, concurrency. This is great!""").
-  onlyIf(StatAtLeast(programmingCred.name, 2)).andIncrease(programmingCred.name)
+  onlyIf(StatAtLeast(programmingCred.name, 2)).andIncrease(programmingCred.name).andProvides(scalaJob).onlyIf(NotHas(scalaJob))
   
   private val speakAtStrangeloop = Opportunity.victory("speak at StrangeLoop",
     """You get to speak at StrangeLoop, the best conference of all! Victory!""").
@@ -113,6 +114,9 @@ object JessLife {
 
   val scenario = Scenario("jesslife",
     Seq(gradSchool, amdocs, computerInternship, payForCollege, goToCollege,
-        takeTest, drinking, pleaseTheTeachers, drama, getMarried, buyHouse, speakAtStrangeloop, speakAtConferences, monsantoJob, blog, goToJUG, stayHome, meetTed),
-    welcome, Seq(grades, programmingCred, publicSpeaking, tasteForAlcohol), Seq(loveOfProgramming, steadyIncome, collegeEnrollment, partTimeJob, house, husband, children, speakingMentor))
+        takeTest, drinking, pleaseTheTeachers, drama, getMarried, buyHouse,
+      speakAtStrangeloop, speakAtConferences, monsantoJob, blog, goToJUG, stayHome, meetTed),
+    welcome,
+    Seq(grades, programmingCred, publicSpeaking, tasteForAlcohol),
+    Seq(loveOfProgramming, steadyIncome, collegeEnrollment, partTimeJob, house, husband, children, speakingMentor, scalaJob))
 }

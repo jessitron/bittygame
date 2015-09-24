@@ -18,7 +18,7 @@ trait ConditionGen {
 
   def bigMustHaveGen(stats:Seq[Stat]) =
     for{
-    stat <- Gen.oneOf(stats)
+      stat <- Gen.oneOf(stats)
       gen <- mustHaveAStatGen(stat)
     } yield gen
 
